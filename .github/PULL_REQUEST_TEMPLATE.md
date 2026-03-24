@@ -1,17 +1,5 @@
----
-name: '✨ Pull Request'
-about: PR을 통해 프로젝트에 기여해주셔서 감사합니다.
-title: '[FEAT] 기능 요약을 작성해주세요'
-labels: ''
-assignees: ''
----
-
 ## 📌 관련 이슈
-Closes #
-
-## 🚀 작업 내용
-- [ ] 작업 내용 1
-- [ ] 작업 내용 2
+#(이슈 번호)
 
 ## 🏷️ 작업 유형 (Type of Change)
 - [ ] ✨ 기능 추가 (Feature)
@@ -20,8 +8,9 @@ Closes #
 - [ ] ♻️ 리팩토링 (Refactor)
 - [ ] 📝 문서 작업 (Docs)
 
-## 📸 프리뷰
-- Vercel Preview URL: 
+## 🚀 작업 내용
+- 작업 내용 1
+- 작업 내용 2
 
 ## ✅ 체크리스트
 - [ ] `README.md`에 명시된 코딩 컨벤션 및 커밋 메시지 규칙을 준수했습니다.
