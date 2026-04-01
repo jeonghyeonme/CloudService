@@ -1,0 +1,222 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+ 
+.modal-content {
+  position: relative;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 32px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: modalFadeIn 0.2s ease-out;
+}
+ 
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ 
+/* 닫기 버튼 */
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+.close-button:hover {
+  color: #ffffff;
+  background-color: #27272a;
+}
+ 
+/* 헤더 */
+.modal-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  color: #ffffff;
+  font-weight: 700;
+}
+.modal-header p {
+  margin: 0 0 20px 0;
+  color: #a1a1aa;
+  font-size: 14px;
+}
+.modal-header hr {
+  border: none;
+  border-top: 1px solid #27272a;
+  margin-bottom: 24px;
+}
+ 
+/* 폼 공통 */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #00ff66;
+  letter-spacing: 1px;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #00ff66;
+}
+.form-group textarea {
+  height: 90px;
+  resize: none;
+}
+.form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a1a1aa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+ 
+/* 공개/비공개 토글 */
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+.form-row .form-group {
+  flex: 1;
+}
+.toggle-group {
+  display: flex;
+  background-color: #27272a;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+.toggle-group button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #a1a1aa;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-group button.active {
+  background-color: #00ff66;
+  color: #000000;
+}
+.toggle-group button:hover:not(.active) {
+  color: #ffffff;
+}
+ 
+/* 이미지 업로드 박스 */
+.upload-box {
+  border: 1px dashed #3f3f46;
+  border-radius: 8px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background-color: #27272a;
+}
+.upload-box:hover {
+  border-color: #00ff66;
+  background-color: rgba(0, 255, 102, 0.05);
+}
+/* 실제 input은 숨김 */
+.upload-box input[type="file"] {
+  display: none;
+}
+.upload-box label {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #a1a1aa;
+  font-size: 13px;
+}
+.upload-box label p {
+  margin: 0;
+}
+.upload-icon {
+  font-size: 28px;
+  color: #52525b;
+}
+.file-name {
+  color: #00ff66;
+  font-size: 13px;
+  word-break: break-all;
+}
+ 
+/* 하단 버튼 */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+.modal-footer button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+/* Cancel */
+.modal-footer button[type="button"] {
+  background: none;
+  color: #a1a1aa;
+  border: 1px solid #3f3f46;
+}
+.modal-footer button[type="button"]:hover {
+  color: #ffffff;
+  border-color: #71717a;
+}
+/* CREATE GROUP */
+.modal-footer button[type="submit"] {
+  background-color: #00ff66;
+  color: #000000;
+  letter-spacing: 0.5px;
+}
+.modal-footer button[type="submit"]:hover {
+  background-color: #00e55c;
+}
