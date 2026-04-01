@@ -1,0 +1,386 @@
+/* =============================================
+   ExploreRooms.css
+   ============================================= */
+
+/* 전체 컨테이너 */
+.explore-container {
+  display: flex;
+  height: 100vh;
+  background-color: #09090b;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+/* ── 극좌측 서버 네비 (ChatLayout과 동일) ── */
+.server-nav {
+  width: 72px;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.server-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #27272a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+.server-icon:hover {
+  border-radius: 16px;
+  background-color: #00ff66;
+  color: #000;
+}
+.home-icon {
+  background-color: #00ff66;
+  color: #000;
+  border-radius: 16px;
+}
+.home-icon.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 32px;
+  background-color: #ffffff;
+  border-radius: 0 4px 4px 0;
+}
+.server-separator {
+  width: 32px;
+  height: 2px;
+  background-color: #27272a;
+  border-radius: 1px;
+}
+.add-btn { color: #00ff66; font-size: 26px; font-weight: 300; }
+.add-btn:hover { color: #000; }
+.spacer { flex: 1; }
+.dummy-bg-1 { background-color: #14532d; }
+.dummy-bg-2 { background-color: #064e3b; }
+.dummy-profile { background-color: #3f3f46; }
+
+/* ── 메인 영역 ── */
+.explore-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 0 48px 48px;
+}
+
+/* 상단 바 */
+.explore-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 0;
+  position: sticky;
+  top: 0;
+  background-color: #09090b;
+  z-index: 10;
+  padding-bottom: 4px;
+}
+.topbar-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #52525b;
+  letter-spacing: 2px;
+}
+.topbar-icons {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #a1a1aa;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.icon-btn:hover { background-color: #27272a; }
+
+/* 히어로 타이틀 */
+.explore-hero {
+  text-align: center;
+  padding: 40px 0 28px;
+}
+.hero-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.accent { color: #00ff66; }
+
+/* 검색창 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.search-bar:focus-within { border-color: #00ff66; }
+.search-icon { font-size: 16px; color: #52525b; flex-shrink: 0; }
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+}
+.search-bar input::placeholder { color: #52525b; }
+
+/* 초대 코드 입력 */
+.invite-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  padding: 10px 10px 10px 18px;
+  margin-bottom: 36px;
+  transition: border-color 0.2s;
+}
+.invite-bar:focus-within { border-color: #3f3f46; }
+.invite-icon { font-size: 16px; color: #52525b; flex-shrink: 0; }
+.invite-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+}
+.invite-bar input::placeholder { color: #52525b; }
+.join-directly-btn {
+  background-color: #00ff66;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.join-directly-btn:hover { background-color: #00e55c; }
+
+/* ── 룸 카드 그리드 ── */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.room-card {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.room-card:hover {
+  border-color: #3f3f46;
+  transform: translateY(-2px);
+}
+.room-card.room-full { opacity: 0.6; }
+
+/* 카드 커버 */
+.room-cover {
+  height: 120px;
+  background-color: #27272a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(135deg, #1a1a1d 0%, #27272a 100%);
+}
+.room-cover-emoji { font-size: 40px; opacity: 0.6; }
+
+/* 상태 배지 */
+.room-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.badge-active {
+  background-color: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+}
+.badge-full {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  border: 1px solid #3f3f46;
+}
+
+/* 카드 바디 */
+.room-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.room-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.room-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  flex: 1;
+}
+.room-count {
+  font-size: 11px;
+  color: #71717a;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.room-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #71717a;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 카드 푸터 */
+.room-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.member-avatars {
+  display: flex;
+  align-items: center;
+}
+.mini-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #3f3f46;
+  border: 2px solid #18181b;
+  margin-left: -6px;
+}
+.mini-avatar:first-child { margin-left: 0; }
+.member-extra {
+  font-size: 11px;
+  color: #71717a;
+  margin-left: 6px;
+}
+
+/* JOIN / LOCKED 버튼 */
+.room-btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.btn-join {
+  background: none;
+  color: #00ff66;
+  border: 1px solid #00ff66;
+}
+.btn-join:hover {
+  background-color: #00ff66;
+  color: #000000;
+}
+.btn-locked {
+  background: none;
+  color: #52525b;
+  border: 1px solid #27272a;
+  cursor: not-allowed;
+}
+
+/* ── 방 만들기 카드 ── */
+.create-card {
+  border: 1px dashed #27272a;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 200px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.create-card:hover {
+  border-color: #00ff66;
+  background-color: rgba(0, 255, 102, 0.03);
+  transform: translateY(-2px);
+}
+.create-plus {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #3f3f46;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #52525b;
+  transition: all 0.2s;
+}
+.create-card:hover .create-plus {
+  border-color: #00ff66;
+  color: #00ff66;
+}
+.create-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a1a1aa;
+  letter-spacing: 0.5px;
+}
+.create-sub {
+  margin: 0;
+  font-size: 11px;
+  color: #52525b;
+  letter-spacing: 0.5px;
+}

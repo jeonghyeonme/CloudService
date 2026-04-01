@@ -1,0 +1,721 @@
+/* =============================================
+   ChatLayout.css
+   ============================================= */
+
+/* 1. 전체 레이아웃 (4단 구조) */
+.chat-container {
+  display: flex;
+  height: 100vh;
+  background-color: #09090b;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+/* 2. 극좌측 서버 네비게이션 */
+.server-nav {
+  width: 72px;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.server-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #27272a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+.server-icon:hover {
+  border-radius: 16px;
+  background-color: #00ff66;
+  color: #000000;
+}
+.home-icon {
+  background-color: #00ff66;
+  color: black;
+  border-radius: 16px;
+}
+.home-icon.active::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 32px;
+  background-color: white;
+  border-radius: 0 4px 4px 0;
+}
+.server-separator {
+  width: 32px;
+  height: 2px;
+  background-color: #27272a;
+  border-radius: 1px;
+}
+.add-btn { color: #00ff66; font-size: 24px; }
+.add-btn:hover { color: black; }
+.spacer { flex: 1; }
+.dummy-bg-1 { background-color: #14532d; }
+.dummy-bg-2 { background-color: #064e3b; }
+
+/* 3. 좌우 사이드바 공통 */
+.sidebar-left, .sidebar-right {
+  width: 240px;
+  background-color: #121214;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* 좌측 채널 목록 */
+.logo {
+  padding: 20px;
+  font-size: 14px;
+  color: #00ff66;
+  letter-spacing: 1px;
+  margin: 0;
+  border-bottom: 1px solid #27272a;
+}
+.channel-list { padding: 8px 10px; }
+.channel {
+  padding: 8px 10px;
+  color: #a1a1aa;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 2px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+.channel.active { background-color: #27272a; color: #ffffff; }
+.channel:hover:not(.active) { background-color: #1e1e20; color: #d4d4d8; }
+.hash { color: #52525b; margin-right: 6px; }
+
+/* 4. 중앙 채팅창 */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #27272a;
+  border-right: 1px solid #27272a;
+  min-width: 0;
+}
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #27272a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.chat-header h3 { margin: 0; font-size: 16px; }
+.chat-header .topic {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 13px;
+  border-left: 1px solid #3f3f46;
+  padding-left: 12px;
+}
+
+/* 채팅 메시지 영역 */
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 일반 메시지 */
+.message-dummy {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.message-dummy:hover { background-color: rgba(255,255,255,0.03); }
+
+/* 내 메시지 (우측 정렬) */
+.message-mine {
+  flex-direction: row-reverse;
+}
+.message-mine .message-content {
+  align-items: flex-end;
+}
+.message-mine .message-content p {
+  background-color: #1a3a2a;
+  padding: 10px 14px;
+  border-radius: 12px 2px 12px 12px;
+}
+
+/* 아바타 */
+.avatar {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  background-color: #3f3f46;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 13px;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+/* 메시지 텍스트 영역 */
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  max-width: 80%;
+}
+.author {
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffffff;
+}
+.message-content p {
+  margin: 0;
+  color: #d4d4d8;
+  line-height: 1.6;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+/* 파일 첨부 카드 */
+.file-attachment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 6px;
+  max-width: 320px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.file-attachment:hover { border-color: #00ff66; }
+.file-icon { font-size: 24px; flex-shrink: 0; }
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.file-info .file-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-info .file-meta {
+  font-size: 11px;
+  color: #71717a;
+  letter-spacing: 0.5px;
+}
+
+/* ✅ SAGE AI 요약 박스 */
+.ai-summary-box {
+  margin-left: 54px; /* 아바타(40) + gap(14) */
+  border: 1px solid #00ff66;
+  border-radius: 8px;
+  background-color: rgba(0, 255, 102, 0.04);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 255, 102, 0.15);
+}
+.ai-icon { font-size: 16px; }
+.ai-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00ff66;
+  letter-spacing: 0.5px;
+}
+.ai-tag {
+  font-size: 11px;
+  color: #52a36c;
+  background-color: rgba(0, 255, 102, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.ai-summary-content { padding: 12px 14px; }
+.ai-summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00ff66;
+  margin: 0 0 10px 0;
+}
+.ai-summary-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai-summary-list li {
+  font-size: 13px;
+  color: #d4d4d8;
+  line-height: 1.5;
+  padding-left: 12px;
+  border-left: 2px solid rgba(0, 255, 102, 0.3);
+}
+.ai-summary-list li strong { color: #ffffff; }
+
+/* 채팅 입력창 */
+.chat-input-area {
+  padding: 0 16px 20px;
+  flex-shrink: 0;
+}
+.chat-input-area input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background-color: #27272a;
+  border: 1px solid transparent;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input-area input:focus { border-color: #00ff66; }
+
+/* 5. 우측 멤버 목록 */
+.section-title {
+  padding: 16px 20px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a1a1aa;
+  letter-spacing: 1px;
+  margin: 0;
+  border-bottom: 1px solid #27272a;
+}
+.member-list {
+  padding: 8px 10px;
+  overflow-y: auto;
+}
+.member-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: #71717a;
+  padding: 10px 8px 6px;
+  letter-spacing: 0.5px;
+}
+.mt-20 { margin-top: 8px; }
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+.member:hover { background-color: #27272a; }
+.name { font-size: 14px; color: #d4d4d8; }
+.green-text { color: #00ff66; font-weight: 500; }
+
+/* 아바타 래퍼 (상태 점 겹치기) */
+.avatar-wrapper {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.avatar-wrapper .avatar {
+  width: 100%;
+  height: 100%;
+  min-width: unset;
+  min-height: unset;
+  font-size: 11px;
+}
+.status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #00ff66;
+  border: 2px solid #121214;
+}
+
+.dummy-offline { background-color: #27272a; }
+.member.offline { opacity: 0.4; }
+.member.offline:hover { opacity: 1; background-color: #27272a; }
+
+.bg-ai { background-color: #14532d; color: #00ff66; font-weight: bold; font-size: 10px; }
+.bot-tag {
+  background-color: #00ff66;
+  color: black;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* =============================================
+   추가 스타일: 내 메시지 / 프로필 / Resource Hub / 멤버패널
+   ============================================= */
+
+/* ✅ 2. 내 메시지 - 아바타 완전 오른쪽 고정 */
+.message-mine {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+.message-mine:hover { background-color: rgba(255,255,255,0.03); }
+.mine-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 75%;
+}
+.mine-author { color: #00ff66 !important; }
+.mine-content p {
+  margin: 0;
+  background-color: #1a3a2a;
+  color: #d4d4d8;
+  padding: 10px 14px;
+  border-radius: 12px 2px 12px 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+/* ✅ 3. 좌측 하단 내 프로필 */
+.sidebar-left {
+  display: flex;
+  flex-direction: column;
+}
+.my-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid #27272a;
+  background-color: #0e0e10;
+  flex-shrink: 0;
+}
+.my-avatar {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: 11px !important;
+  background-color: #14532d;
+  color: #00ff66;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.my-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.my-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.my-status {
+  font-size: 11px;
+  color: #00ff66;
+}
+.my-settings {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #71717a;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.my-settings:hover { background-color: #27272a; }
+
+/* ✅ 4. 우측 사이드바 전체 구조 */
+.sidebar-right {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  background-color: #121214;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Resource Hub */
+.resource-hub {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-bottom: 1px solid #27272a;
+}
+.hub-header {
+  padding: 16px 16px 0;
+  flex-shrink: 0;
+}
+.hub-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #71717a;
+  letter-spacing: 1.5px;
+  margin: 0 0 12px 0;
+}
+.hub-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid #27272a;
+  padding-bottom: 0;
+}
+.hub-tab {
+  background: none;
+  border: none;
+  color: #71717a;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.hub-tab:hover { color: #d4d4d8; }
+.hub-tab.active {
+  color: #ffffff;
+  border-bottom-color: #00ff66;
+}
+
+.hub-section { padding: 14px 16px 0; }
+.hub-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #52525b;
+  letter-spacing: 1.5px;
+  margin: 0 0 10px 0;
+}
+.hub-file-list { display: flex; flex-direction: column; gap: 2px; }
+
+.hub-file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.hub-file-item:hover { background-color: #1e1e21; }
+.hub-file-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background-color: #1e1e21;
+}
+.hub-file-icon.pdf  { background-color: #2d1515; }
+.hub-file-icon.docx { background-color: #12243a; }
+.hub-file-icon.csv  { background-color: #122a1a; }
+.hub-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hub-file-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #d4d4d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hub-file-meta {
+  font-size: 11px;
+  color: #52525b;
+}
+
+/* 공유 미팅 배너 */
+.hub-meeting {
+  margin: 14px 16px 16px;
+  background: linear-gradient(135deg, #0f2d1a, #14532d);
+  border: 1px solid rgba(0,255,102,0.2);
+  border-radius: 10px;
+  padding: 14px;
+}
+.hub-meeting-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #00ff66;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.meeting-dot { font-size: 8px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.hub-meeting-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+}
+.hub-meeting-sub {
+  font-size: 11px;
+  color: #86efac;
+  margin: 0 0 12px;
+}
+.hub-meeting-btn {
+  width: 100%;
+  background-color: #00ff66;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.hub-meeting-btn:hover { background-color: #00e55c; }
+
+/* 하단 멤버 패널 */
+.member-panel {
+  flex-shrink: 0;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.member-panel-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #71717a;
+  letter-spacing: 1.5px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid #27272a;
+  flex-shrink: 0;
+}
+.member-panel .member-list {
+  overflow-y: auto;
+  padding: 6px 10px 8px;
+}
+
+/* active-server 표시 */
+.active-server {
+  border: 2px solid #00ff66;
+}
+
+/* Links 아이콘 */
+.hub-file-icon.link { background-color: #1a2a3a; }
+
+/* Pins 아이템 */
+.hub-pin-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.hub-pin-item:hover { background-color: #1e1e21; }
+.hub-pin-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Pins 탭 아이템 ── */
+.hub-pin-item {
+  padding: 10px 8px;
+  border-radius: 8px;
+  border-left: 2px solid #3f3f46;
+  margin-bottom: 8px;
+  background-color: #1a1a1d;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.hub-pin-item:hover {
+  border-color: #00ff66;
+  background-color: #1e1e21;
+}
+.hub-pin-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.hub-pin-author span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4d4d8;
+}
+.hub-pin-time {
+  font-size: 10px;
+  color: #52525b !important;
+  font-weight: 400 !important;
+  margin-left: auto;
+}
+.hub-pin-text {
+  margin: 0;
+  font-size: 12px;
+  color: #a1a1aa;
+  line-height: 1.5;
+}
+
+/* hub-no-content */
+.hub-no-content {
+  font-size: 12px;
+  color: #52525b;
+  padding: 12px 8px;
+  text-align: center;
+}
