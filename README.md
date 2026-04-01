@@ -91,42 +91,89 @@ frontend/
 우리 프로젝트는 AWS 클라우드 비용 방어와 빠른 로컬 테스트를 위해 **Docker + LocalStack** 조합을 사용합니다.
 
 ### 0. 필수 사전 준비 (Prerequisites)
-* **[Node.js](https://nodejs.org/ko/)**: v18.x 이상 권장 (LTS 버전 설치)
-* **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**: 설치 후 반드시 프로그램을 **실행** 상태로 유지해 주세요.
+* **[Node.js](https://nodejs.org/ko/)**: v18.x 이상 (LTS)
+* **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**: 설치 후 반드시 **실행** 상태여야 합니다.
+* **[Postman](https://www.postman.com/)**: API 테스트용
 
-### 1. 패키지 설치 및 셋업 (Backend)
-프로젝트를 Clone 받은 후, 터미널에서 `backend` 폴더로 이동하여 패키지를 설치합니다.
+### 1. 패키지 설치
+최상위(루트) 폴더 및 각 하위 프로젝트의 의존성을 설치합니다.
 ```bash
-cd backend
+# 1. 루트 패키지 설치 (concurrently 등 도구)
 npm install
+
+# 2. 프론트엔드 패키지 설치
+cd frontend && npm install
+
+# 3. 백엔드 패키지 설치
+cd ../backend && npm install
 ```
 
-### 2. 가상 AWS 인프라 실행 (LocalStack)
-터미널 경로가 backend 폴더인지 확인한 후, 가상 인프라(S3, DynamoDB, Cognito)를 백그라운드에서 실행합니다.
+### 2. 통합 실행 (스크립트 실행)
+루트 디렉토리에서 아래 명령어를 입력하면 프론트, 백, Docker 인프라 구동 실행이 전부 이루어집니다.
 ```bash
-docker-compose up -d
+npm start
 ```
-* ✅ 실행 확인: 브라우저 주소창에 http://localhost:4566/_localstack/health 입력 시 JSON 데이터가 정상적으로 뜨면 인프라 구동 완료입니다.
 
-### 3. 서버리스(Serverless) API 서버 구동
-인프라가 준비되었다면 API 서버를 켭니다.
+### 3. 현재 주요 스크립트
+아래는 package.json으로 정의한 npm run 스크립트들입니다. 모든 명령어는 루트 디렉토리에서 실행하는 것을 권장합니다.
+| 명령어 | 설명 |
+| :--- | :--- |
+| **`npm start`** | 전체 환경(인프라+백+프론트) 동시 실행 |
+| **`npm run start:front`** | 프론트 로컬 실행 |
+| **`npm run start:back`** | 백엔드(serverless offline) 로컬 실행 - 포트 4000 |
+| **`npm run infra:up`** | LocalStack 인프라만 백그라운드 실행 (`docker-compose up -d`) |
+| **`npm run infra:down`** | 실행 중인 인프라 종료 및 컨테이너 종료(삭제) |
+
+---
+
+## 💻 개발 환경 정보
+서버 구동 후 아래 포트를 통해 각 서비스에 접근할 수 있습니다.
+| 서비스 | 주소 | 비고 |
+| :--- | :--- | :--- |
+| **Frontend** | `http://localhost:3000` | React 개발 서버 |
+| **Backend** | `http://localhost:4000` | Serverless Offline API |
+| **LocalStack** | `http://localhost:4566` | AWS 가상 인프라 (S3, DB 등) |
+
+#### 🛠️ 데이터베이스 테이블 생성 (Local Only)
+LocalStack을 처음 실행했거나 인프라를 초기화한 경우, 아래 명령어를 실행하여 로컬 DynamoDB 테이블을 생성해야 합니다.
 ```bash
-npx start
+cd backend/infra
+python createTable.py
 ```
-* 터미널에 POST | http://localhost:3000/dev/rooms 주소가 뜨면 서버가 정상적으로 실행된 것입니다.
 
-### 4. 첫 API 통신 테스트 (Postman)
-서버 구동 확인 후 포스트맨(또는 VS Code Thunder Client)을 통해 직접 API를 테스트합니다.
-* **Method**: POST
-* **URL**: `http://localhost:3000/dev/rooms`
-* **Body** (raw -> JSON):
+#### 첫 API 통신 테스트 (Postman)
+백엔드 서버가 켜지면 아래 주소로 테스트 요청을 보낼 수 있습니다.
+
+- **Method**: POST
+
+- **URL**: http://localhost:4000/dev/rooms
+
+- **Body** (JSON):
 ```bash
 {
-    "roomName": "테스트 스터디룸",
+    # POST 예시
+    "roomName": "정처기 스터디",
+    "description": "2026년 합격 목표",
     "maxCapacity": 10
 }
 ```
-* 결과: "스터디룸이 성공적으로 생성되었습니다!" 응답이 오면 환경 세팅이 완벽하게 완료된 것입니다!
+- **Method**: GET
+
+- **URL**: http://localhost:4000/dev/rooms
+```bash
+{
+    # GET 결과 예시
+    {
+        "createdAt": "2026-04-01T07:46:21.482Z",
+        "description": "2회 실기 시험 대비 기출 풀이 스터디입니다.",
+        "roomId": "room_ep5qjix6g",
+        "roomName": "정처기 2026 합격방",
+        "status": "ACTIVE"
+    }
+}
+```
+
+
 
 
 ---

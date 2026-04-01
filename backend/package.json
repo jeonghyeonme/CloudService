@@ -4,10 +4,15 @@
   "description": "스마트 스터디 메신저 서버리스 백엔드",
   "main": "index.js",
   "scripts": {
-    "start": "serverless offline"
+    "start": "serverless offline --httpPort 4000",
+    "localstack": "docker-compose up -d"
   },
   "devDependencies": {
     "serverless": "^3.40.0",
     "serverless-offline": "^13.9.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1021.0",
+    "@aws-sdk/lib-dynamodb": "^3.1021.0"
   }
 }

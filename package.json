@@ -1,0 +1,28 @@
+{
+  "name": "cloudservice",
+  "version": "1.0.0",
+  "description": "AWS 서버리스 아키텍처를 기반으로 하는 실시간 웹 메신저 프로젝트입니다. 스터디 그룹을 위한 효율적인 커뮤니케이션 및 자료 공유 기능을 제공하는 것을 목표로 합니다.\r 현재 **프론트엔드(React) 개발**이 우선적으로 진행되고 있으며, 추후 백엔드 및 클라우드 인프라가 연동될 예정입니다.",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run infra:up && concurrently \"npm run start:front\" \"npm run start:back\"",
+    "start:front": "npm start --prefix frontend",
+    "start:back": "npm start --prefix backend",
+    "infra:up": "docker-compose -f backend/infra/docker-compose.yml --project-directory backend/infra up -d",
+    "infra:down": "docker-compose -f backend/infra/docker-compose.yml --project-directory backend/infra down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeonghyeonme/cloudservice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jeonghyeonme/cloudservice/issues"
+  },
+  "homepage": "https://github.com/jeonghyeonme/cloudservice#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

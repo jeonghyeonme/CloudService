@@ -26,12 +26,20 @@ provider:
 # 개발할 API 람다 함수 목록
 functions:
   createRoom:
-    handler: createRoom.handler
+    handler: src/rooms/createRoom.handler
     events:
       - http:
           path: /rooms
           method: post
           cors: true # 프론트엔드 연동을 위한 CORS 허용
+  getRooms:
+    handler: src/rooms/getRooms.handler
+    events:
+      - http:
+          path: /rooms
+          method: get
+          cors: true
+
 
 # DynamoDB 테이블 설계도
 resources:
