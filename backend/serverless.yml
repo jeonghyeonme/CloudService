@@ -1,0 +1,63 @@
+service: smart-study-backend
+
+frameworkVersion: '3'
+
+# 로컬 오프라인 테스트용 플러그인
+plugins:
+  - serverless-offline
+
+custom:
+  studentId: "inhatc-202647019" # 학번 변경 필수 
+  roomsTableName: ${self:service}-${self:provider.stage}-Rooms
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1  # 버지니아 북부 리전 고정
+  stage: dev
+  
+  # 람다가 자체적으로 권한을 만들지 못하게 막고, SafeRole 강제 주입
+  # role: arn:aws:iam::${aws:accountId}:role/SafeRole-${self:custom.studentId}
+  
+  # 람다 함수들 안에서 쓸 수 있는 전역 환경 변수
+  environment:
+    ROOMS_TABLE: ${self:custom.roomsTableName}
+
+# 개발할 API 람다 함수 목록
+functions:
+  createRoom:
+    handler: createRoom.handler
+    events:
+      - http:
+          path: /rooms
+          method: post
+          cors: true # 프론트엔드 연동을 위한 CORS 허용
+
+# DynamoDB 테이블 설계도
+resources:
+  Resources:
+    # 1. 스터디룸 테이블
+    RoomsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.roomsTableName}
+        BillingMode: PAY_PER_REQUEST # 요금 방어를 위한 온디맨드 설정
+        AttributeDefinitions:
+          - AttributeName: roomId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: roomId
+            KeyType: HASH # PK
+        GlobalSecondaryIndexes:
+          - IndexName: status-createdAt-index
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH # GSI-PK
+              - AttributeName: createdAt
+                KeyType: RANGE # GSI-SK (최신순 정렬용)
+            Projection:
+              ProjectionType: ALL

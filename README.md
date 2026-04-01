@@ -86,6 +86,51 @@ frontend/
 
 ---
 
+## 🛠️ 백엔드 로컬 개발 환경 세팅 가이드 (Local Setup)
+
+우리 프로젝트는 AWS 클라우드 비용 방어와 빠른 로컬 테스트를 위해 **Docker + LocalStack** 조합을 사용합니다.
+
+### 0. 필수 사전 준비 (Prerequisites)
+* **[Node.js](https://nodejs.org/ko/)**: v18.x 이상 권장 (LTS 버전 설치)
+* **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**: 설치 후 반드시 프로그램을 **실행** 상태로 유지해 주세요.
+
+### 1. 패키지 설치 및 셋업 (Backend)
+프로젝트를 Clone 받은 후, 터미널에서 `backend` 폴더로 이동하여 패키지를 설치합니다.
+```bash
+cd backend
+npm install
+```
+
+### 2. 가상 AWS 인프라 실행 (LocalStack)
+터미널 경로가 backend 폴더인지 확인한 후, 가상 인프라(S3, DynamoDB, Cognito)를 백그라운드에서 실행합니다.
+```bash
+docker-compose up -d
+```
+* ✅ 실행 확인: 브라우저 주소창에 http://localhost:4566/_localstack/health 입력 시 JSON 데이터가 정상적으로 뜨면 인프라 구동 완료입니다.
+
+### 3. 서버리스(Serverless) API 서버 구동
+인프라가 준비되었다면 API 서버를 켭니다.
+```bash
+npx start
+```
+* 터미널에 POST | http://localhost:3000/dev/rooms 주소가 뜨면 서버가 정상적으로 실행된 것입니다.
+
+### 4. 첫 API 통신 테스트 (Postman)
+서버 구동 확인 후 포스트맨(또는 VS Code Thunder Client)을 통해 직접 API를 테스트합니다.
+* **Method**: POST
+* **URL**: `http://localhost:3000/dev/rooms`
+* **Body** (raw -> JSON):
+```bash
+{
+    "roomName": "테스트 스터디룸",
+    "maxCapacity": 10
+}
+```
+* 결과: "스터디룸이 성공적으로 생성되었습니다!" 응답이 오면 환경 세팅이 완벽하게 완료된 것입니다!
+
+
+---
+
 # 📌 프로젝트 그라운드 룰 (Ground Rules)
 
 성공적인 프로젝트 수행과 원활한 협업을 위해 우리 팀이 반드시 지켜야 할 최소한의 규칙입니다.
