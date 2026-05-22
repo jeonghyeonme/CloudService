@@ -1,8 +1,38 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./ContextMenu.css";
+
+const VIEWPORT_PADDING = 12;
 
 function ContextMenu({ open, position, title, items = [], onClose }) {
   const menuRef = useRef(null);
+  const [resolvedPosition, setResolvedPosition] = useState(position);
+
+  useLayoutEffect(() => {
+    if (!open || !menuRef.current || !position) {
+      if (!open) {
+        setResolvedPosition(position);
+      }
+      return;
+    }
+
+    const clampPosition = () => {
+      const menuRect = menuRef.current.getBoundingClientRect();
+      const maxX = window.innerWidth - menuRect.width - VIEWPORT_PADDING;
+      const maxY = window.innerHeight - menuRect.height - VIEWPORT_PADDING;
+
+      setResolvedPosition({
+        x: Math.max(VIEWPORT_PADDING, Math.min(position.x, maxX)),
+        y: Math.max(VIEWPORT_PADDING, Math.min(position.y, maxY)),
+      });
+    };
+
+    clampPosition();
+    window.addEventListener("resize", clampPosition);
+
+    return () => {
+      window.removeEventListener("resize", clampPosition);
+    };
+  }, [items, open, position, title]);
 
   useEffect(() => {
     if (!open) {
@@ -39,8 +69,8 @@ function ContextMenu({ open, position, title, items = [], onClose }) {
       ref={menuRef}
       className="context-menu"
       style={{
-        top: position?.y ?? 0,
-        left: position?.x ?? 0,
+        top: resolvedPosition?.y ?? 0,
+        left: resolvedPosition?.x ?? 0,
       }}
       role="menu"
     >

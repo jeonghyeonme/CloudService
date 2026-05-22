@@ -6,12 +6,16 @@ export function buildServerContextMenuItems({
   onLeave,
 }) {
   return [
-    {
-      key: "moderation",
-      label: "멤버 관리",
-      icon: "👥",
-      onClick: onOpenModeration,
-    },
+    ...(onOpenModeration
+      ? [
+          {
+            key: "moderation",
+            label: "멤버 관리",
+            icon: "👥",
+            onClick: onOpenModeration,
+          },
+        ]
+      : []),
     {
       key: "settings",
       label: "설정",

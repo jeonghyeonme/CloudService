@@ -62,9 +62,11 @@ const ChatLayout = () => {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [moderationMembers, setModerationMembers] = useState([]);
 
-  // ✅ 서버 변경 시 onlineUserIds 초기화
+  // ✅ 서버 변경 시 이전 서버의 실시간/모달 상태 초기화
   useEffect(() => {
     setOnlineUserIds([]);
+    setModerationMembers([]);
+    setIsMemberModalOpen(false);
   }, [serverId]);
 
   const handleLogout = async () => {

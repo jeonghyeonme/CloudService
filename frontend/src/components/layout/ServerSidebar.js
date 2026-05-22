@@ -75,11 +75,6 @@ const ServerSidebar = ({
             key={sid}
             className={`server-icon server-entry-icon ${isActiveServer ? "active-server" : ""} ${isContextOpen ? "context-open" : ""}`}
             onClick={() => navigate(getServerPath(sid))}
-            onMouseDown={(event) => {
-              if (event.button === 2) {
-                handleRightClick(event, onServerContextMenu, server);
-              }
-            }}
             onContextMenu={(event) =>
               handleRightClick(event, onServerContextMenu, server)
             }
