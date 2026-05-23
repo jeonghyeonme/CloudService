@@ -50,6 +50,35 @@ export function joinServer(serverId, password) {
   return request(`${ENDPOINTS.servers.list}/${serverId}/join`, options);
 }
 
+// --- 초대(Invite) 관련 ---
+
+export function listInvites(serverId) {
+  return request(ENDPOINTS.invites.base(serverId), { method: "GET" });
+}
+
+export function createInvite(serverId, payload) {
+  return request(ENDPOINTS.invites.base(serverId), {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteInvite(serverId, inviteId) {
+  return request(ENDPOINTS.invites.item(serverId, inviteId), { method: "DELETE" });
+}
+
+export function resetInvites(serverId) {
+  return request(ENDPOINTS.invites.reset(serverId), { method: "POST" });
+}
+
+export function validateInvite(code) {
+  return request(ENDPOINTS.invites.validate(code), { method: "GET" });
+}
+
+export function joinByInvite(code) {
+  return request(ENDPOINTS.invites.join(code), { method: "POST" });
+}
+
 export function createChannel(serverId, payload) {
   return request(`${ENDPOINTS.servers.list}/${serverId}/channels`, {
     method: "POST",
