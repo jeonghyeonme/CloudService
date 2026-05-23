@@ -58,6 +58,15 @@
   color: #ffffff;
 }
 
+.context-menu__item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.context-menu__item:disabled:hover {
+  background: transparent;
+}
+
 .context-menu__item--danger {
   color: #f87171;
 }

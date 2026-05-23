@@ -50,6 +50,35 @@ export function joinServer(serverId, password) {
   return request(`${ENDPOINTS.servers.list}/${serverId}/join`, options);
 }
 
+// --- 초대(Invite) 관련 ---
+
+export function listInvites(serverId) {
+  return request(ENDPOINTS.invites.base(serverId), { method: "GET" });
+}
+
+export function createInvite(serverId, payload) {
+  return request(ENDPOINTS.invites.base(serverId), {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteInvite(serverId, inviteId) {
+  return request(ENDPOINTS.invites.item(serverId, inviteId), { method: "DELETE" });
+}
+
+export function resetInvites(serverId) {
+  return request(ENDPOINTS.invites.reset(serverId), { method: "POST" });
+}
+
+export function validateInvite(code) {
+  return request(ENDPOINTS.invites.validate(code), { method: "GET" });
+}
+
+export function joinByInvite(code) {
+  return request(ENDPOINTS.invites.join(code), { method: "POST" });
+}
+
 export function createChannel(serverId, payload) {
   return request(`${ENDPOINTS.servers.list}/${serverId}/channels`, {
     method: "POST",
@@ -73,38 +102,40 @@ export const updateChannel = async (serverId, chId, data) => {
   });
 };
 
-// ✅ 초대 코드 API
-export function listInvites(serverId) {
-  return request(`${ENDPOINTS.servers.list}/${serverId}/invites`, { method: "GET" });
-}
- 
-export function createInvite(serverId, options = {}) {
-  return request(`${ENDPOINTS.servers.list}/${serverId}/invites`, {
-    method: "POST",
-    body: JSON.stringify(options),
-  });
-}
- 
-export function deleteInvite(serverId, inviteId) {
-  return request(`${ENDPOINTS.servers.list}/${serverId}/invites/${inviteId}`, {
-    method: "DELETE",
-  });
-}
- 
-export function resetInvites(serverId) {
-  return request(`${ENDPOINTS.servers.list}/${serverId}/invites/reset`, {
-    method: "POST",
-  });
-}
- 
-export function validateInvite(inviteCode) {
-  return request(`/invites/${encodeURIComponent(inviteCode.trim().toUpperCase())}`, {
+export function listMembers(serverId) {
+  return request(ENDPOINTS.moderation.members(serverId), {
     method: "GET",
   });
 }
- 
-export function joinByInvite(inviteCode) {
-  return request(`/invites/${encodeURIComponent(inviteCode.trim().toUpperCase())}/join`, {
+
+export function updateMemberRole(serverId, targetUserId, role) {
+  return request(ENDPOINTS.moderation.updateMemberRole(serverId, targetUserId), {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+
+export function kickMember(serverId, targetUserId) {
+  return request(ENDPOINTS.moderation.kickMember(serverId, targetUserId), {
     method: "POST",
+  });
+}
+
+export function banMember(serverId, targetUserId) {
+  return request(ENDPOINTS.moderation.banMember(serverId, targetUserId), {
+    method: "POST",
+  });
+}
+
+export function unbanMember(serverId, targetUserId) {
+  return request(ENDPOINTS.moderation.unbanMember(serverId, targetUserId), {
+    method: "DELETE",
+  });
+}
+
+export function transferOwnership(serverId, targetUserId) {
+  return request(ENDPOINTS.moderation.transferOwnership(serverId), {
+    method: "POST",
+    body: JSON.stringify({ targetUserId }),
   });
 }

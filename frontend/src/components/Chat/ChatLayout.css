@@ -599,6 +599,7 @@
   transition: background 0.15s;
 }
 .member:hover { background-color: #27272a; }
+.member.context-open { background-color: rgba(255, 255, 255, 0.08); opacity: 1; }
 .name { font-size: 14px; color: #d4d4d8; }
 .green-text { color: #00ff66; font-weight: 500; }
 
@@ -1034,121 +1035,4 @@
   font-size: 11px;
   color: #3f3f46;
   line-height: 1.5;
-}
-
-/* ── 메시지 검색 UI ── */
-.chat-search-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 15px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  color: #71717a;
-  transition: background 0.2s, color 0.2s;
-}
-.chat-search-toggle:hover,
-.chat-search-toggle.active {
-  background: rgba(0, 255, 102, 0.1);
-  color: #00ff66;
-}
- 
-.chat-search-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #18181b;
-  border: 1px solid #3f3f46;
-  border-radius: 8px;
-  padding: 5px 10px;
-  transition: border-color 0.2s;
-}
-.chat-search-bar:focus-within {
-  border-color: #00ff66;
-}
-.chat-search-icon {
-  font-size: 13px;
-  color: #52525b;
-}
-.chat-search-input {
-  background: none;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-size: 13px;
-  width: 180px;
-  font-family: inherit;
-}
-.chat-search-input::placeholder {
-  color: #52525b;
-}
-.chat-search-clear {
-  background: none;
-  border: none;
-  color: #71717a;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 0 2px;
-  line-height: 1;
-}
-.chat-search-clear:hover {
-  color: #fff;
-}
- 
-/* 검색 결과 패널 */
-.chat-search-results {
-  border-bottom: 1px solid #27272a;
-  background: #111113;
-  max-height: 320px;
-  overflow-y: auto;
-}
-.chat-search-status {
-  padding: 12px 20px;
-  font-size: 13px;
-  color: #52525b;
-}
-.chat-search-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-  gap: 8px;
-  color: #52525b;
-  font-size: 13px;
-}
-.chat-search-count {
-  padding: 8px 16px;
-  font-size: 11px;
-  color: #71717a;
-  border-bottom: 1px solid #27272a;
-}
-.chat-search-list {
-  display: flex;
-  flex-direction: column;
-}
-.chat-search-item {
-  padding: 10px 16px;
-  border-bottom: 1px solid #1f1f22;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.chat-search-item:hover {
-  background: #18181b;
-}
-.chat-search-item-author {
-  font-size: 12px;
-  font-weight: 600;
-  color: #00ff66;
-  margin-bottom: 3px;
-}
-.chat-search-item-content {
-  font-size: 13px;
-  color: #d4d4d8;
-  line-height: 1.5;
-  word-break: break-word;
-}
-.chat-search-item-date {
-  font-size: 11px;
-  color: #52525b;
-  margin-top: 4px;
 }

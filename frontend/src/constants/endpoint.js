@@ -17,6 +17,25 @@ export const ENDPOINTS = {
     list: "/servers",
     mine: "/servers/me",
   },
+  invites: {
+    base: (serverId) => `/servers/${serverId}/invites`,
+    item: (serverId, inviteId) => `/servers/${serverId}/invites/${inviteId}`,
+    reset: (serverId) => `/servers/${serverId}/invites/reset`,
+    validate: (code) => `/invites/${code}`,
+    join: (code) => `/invites/${code}/join`,
+  },
+  moderation: {
+    members: (serverId) => `/servers/${serverId}/members`,
+    updateMemberRole: (serverId, targetUserId) =>
+      `/servers/${serverId}/members/${targetUserId}/role`,
+    kickMember: (serverId, targetUserId) =>
+      `/servers/${serverId}/members/${targetUserId}/kick`,
+    banMember: (serverId, targetUserId) =>
+      `/servers/${serverId}/members/${targetUserId}/ban`,
+    unbanMember: (serverId, targetUserId) =>
+      `/servers/${serverId}/bans/${targetUserId}`,
+    transferOwnership: (serverId) => `/servers/${serverId}/ownership`,
+  },
 };
 
 export function createApiUrl(path) {

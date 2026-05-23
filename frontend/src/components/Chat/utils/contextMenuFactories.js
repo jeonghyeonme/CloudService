@@ -1,10 +1,21 @@
 export function buildServerContextMenuItems({
   canDelete,
+  onOpenModeration,
   onOpenSettings,
   onOpenDeleteConfirm,
   onLeave,
 }) {
   return [
+    ...(onOpenModeration
+      ? [
+          {
+            key: "moderation",
+            label: "멤버 관리",
+            icon: "👥",
+            onClick: onOpenModeration,
+          },
+        ]
+      : []),
     {
       key: "settings",
       label: "설정",

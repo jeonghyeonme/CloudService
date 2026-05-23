@@ -39,6 +39,7 @@ const SidebarLeft = ({
   onAddChannelClick,
   onServerContextMenu,
   onChannelContextMenu,
+  onMemberContextMenu,
   contextMenuTargetId,
   contextMenuType,
   members = [],
@@ -64,9 +65,6 @@ const SidebarLeft = ({
     <aside className="sidebar-left">
       <h2
         className="logo"
-        onMouseDown={(event) => {
-          if (event.button === 2) handleRightClick(event, onServerContextMenu);
-        }}
         onContextMenu={(event) => handleRightClick(event, onServerContextMenu)}
       >
         <span className="logo-text">{serverName}</span>
@@ -93,9 +91,6 @@ const SidebarLeft = ({
                 key={cid}
                 className={`channel ${isActive ? "active" : ""} ${isContextOpen ? "context-open" : ""}`}
                 onClick={() => onChannelClick(cid)}
-                onMouseDown={(event) => {
-                  if (event.button === 2) handleRightClick(event, onChannelContextMenu, ch);
-                }}
                 onContextMenu={(event) => handleRightClick(event, onChannelContextMenu, ch)}
               >
                 <span className="hash">#</span>{" "}
@@ -124,7 +119,11 @@ const SidebarLeft = ({
         </div>
         <div className="member-list">
           {onlineMembers.map((m) => (
-            <div key={m.userId} className="member online">
+            <div
+              key={m.userId}
+              className={`member online ${contextMenuType === "member" && contextMenuTargetId === m.userId ? "context-open" : ""}`}
+              onContextMenu={(event) => handleRightClick(event, onMemberContextMenu, m)}
+            >
               <div className="avatar-wrapper">
                 <div className="avatar">{m.nickname?.charAt(0).toUpperCase()}</div>
                 <div className="status-dot"></div>
@@ -144,7 +143,11 @@ const SidebarLeft = ({
                 오프라인 — {offlineMembers.length}명
               </div>
               {offlineMembers.map((m) => (
-                <div key={m.userId} className="member offline">
+                <div
+                  key={m.userId}
+                  className={`member offline ${contextMenuType === "member" && contextMenuTargetId === m.userId ? "context-open" : ""}`}
+                  onContextMenu={(event) => handleRightClick(event, onMemberContextMenu, m)}
+                >
                   <div className="avatar-wrapper">
                     <div className="avatar">{m.nickname?.charAt(0).toUpperCase()}</div>
                   </div>

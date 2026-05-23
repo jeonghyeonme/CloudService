@@ -1,0 +1,142 @@
+.member-moderation-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.member-moderation-modal {
+  width: min(920px, calc(100vw - 40px));
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+  background: #121214;
+  border: 1px solid #2a2a2f;
+  border-radius: 12px;
+  color: #fff;
+  padding: 18px;
+}
+
+.member-moderation-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.member-moderation-modal__header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.member-moderation-modal__header button {
+  border: 0;
+  background: transparent;
+  color: #d4d4d8;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.member-moderation-modal__section {
+  margin-top: 14px;
+}
+
+.member-moderation-modal__section h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #a1a1aa;
+}
+
+.member-moderation-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member-moderation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #1a1a1d;
+  border: 1px solid #2b2b31;
+}
+
+.member-moderation-row__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.member-moderation-row__meta strong {
+  font-size: 14px;
+}
+
+.member-moderation-row__meta span {
+  font-size: 12px;
+  color: #71717a;
+}
+
+.member-moderation-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.member-moderation-row__actions select,
+.member-moderation-row__actions button {
+  border: 1px solid #3f3f46;
+  background: #111315;
+  color: #e4e4e7;
+  border-radius: 6px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.member-moderation-row__actions button.danger {
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.member-moderation-row__actions button:disabled,
+.member-moderation-row__actions select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.member-role-badge {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.member-role-badge.role-host {
+  background: #14532d;
+  color: #86efac;
+}
+
+.member-role-badge.role-moderator {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+
+.member-role-badge.role-member {
+  background: #27272a;
+  color: #d4d4d8;
+}
+
+.member-moderation-modal__empty {
+  margin: 0;
+  font-size: 13px;
+  color: #71717a;
+  padding: 8px;
+}
