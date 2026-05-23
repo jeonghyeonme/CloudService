@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getServerPath } from "../../constants/path";
-import { getServers, joinServer, updateServer, leaveServer, deleteServer } from "../../lib/servers";
+import { getServers, joinServer, updateServer, leaveServer, deleteServer, validateInvite, joinByInvite } from "../../lib/servers";
 import "./ExploreServers.css";
 import ServerSidebar from "../layout/ServerSidebar";
 import CreateServerModal from "./CreateServerModal";
@@ -221,10 +221,35 @@ const ExploreServers = () => {
     }
   };
 
-  const handleDirectJoin = () => {
-    if (!inviteCode.trim()) {
-      toast.info("입력 필요", "코드 혹은 주소를 입력해주세요.");
+  // ✅ 초대 코드로 즉시 입장
+  const handleDirectJoin = async () => {
+    const code = inviteCode.trim().toUpperCase();
+    if (!code) {
+      toast.info("입력 필요", "초대 코드를 입력해주세요.");
       return;
+    }
+    try {
+      const validation = await validateInvite(code);
+      if (!validation.valid) {
+        toast.error("유효하지 않은 코드", validation.message || "유효하지 않은 초대 코드입니다.");
+        return;
+      }
+      const { serverId: targetServerId } = validation.invite;
+ 
+      if (isAlreadyMember({ serverId: targetServerId })) {
+        navigate(getServerPath(targetServerId));
+        return;
+      }
+ 
+      const result = await joinByInvite(code);
+      if (result.alreadyMember) {
+        navigate(getServerPath(targetServerId));
+        return;
+      }
+      toast.success("입장 완료", `${validation.invite.serverName} 서버에 입장했습니다.`);
+      navigate(getServerPath(targetServerId));
+    } catch (error) {
+      toast.error("입장 실패", error.message || "초대 코드 입장에 실패했습니다.");
     }
   };
 
@@ -342,6 +367,7 @@ const ExploreServers = () => {
             placeholder="초대 코드 또는 URL 입력"
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleDirectJoin(); }}
           />
           <button className="join-directly-btn" onClick={handleDirectJoin}>
             즉시 입장
@@ -401,6 +427,8 @@ const ExploreServers = () => {
         )}
         onClose={closeSettingsModal}
         onSubmit={handleServerSettingsSubmit}
+        serverId={getServerId(settingsModal?.server)}
+        isHost={user?.userId === settingsModal?.server?.hostId}
       />
 
       <ConfirmModal

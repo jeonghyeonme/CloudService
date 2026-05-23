@@ -35,7 +35,6 @@ export function leaveServer(serverId) {
   return request(`${ENDPOINTS.servers.list}/${serverId}/leave`, { method: "POST", });
 }
 
-// ✅ keyword 파라미터 추가
 export function getServerMessages(serverId, keyword) {
   const url = keyword?.trim()
     ? `${ENDPOINTS.servers.list}/${serverId}/messages?keyword=${encodeURIComponent(keyword.trim())}`
@@ -44,9 +43,7 @@ export function getServerMessages(serverId, keyword) {
 }
 
 export function joinServer(serverId, password) {
-  const options = {
-    method: "POST",
-  };
+  const options = { method: "POST", };
   if (password) {
     options.body = JSON.stringify({ serverPassword: password });
   }

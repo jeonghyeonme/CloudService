@@ -1,0 +1,215 @@
+/* ── 초대 코드 관리 ── */
+.invite-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 0;
+}
+
+.invite-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #71717a;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+}
+
+/* 생성 영역 */
+.invite-create-box {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.invite-options {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.invite-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.invite-option-group label {
+  font-size: 11px;
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
+.invite-option-group select {
+  background: #09090b;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.invite-option-group select:focus {
+  border-color: #00ff66;
+}
+
+.invite-create-btn {
+  background: #00ff66;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  align-self: flex-end;
+}
+
+.invite-create-btn:hover:not(:disabled) {
+  background: #00e55c;
+}
+
+.invite-create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 목록 영역 */
+.invite-list-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.invite-reset-btn {
+  background: none;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  color: #71717a;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.invite-reset-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.invite-loading {
+  font-size: 13px;
+  color: #52525b;
+  padding: 12px;
+  text-align: center;
+}
+
+.invite-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  color: #52525b;
+  font-size: 13px;
+  background: #18181b;
+  border-radius: 10px;
+  border: 1px dashed #27272a;
+}
+
+.invite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.invite-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.invite-code-badge {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #00ff66;
+  letter-spacing: 2px;
+  background: rgba(0, 255, 102, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.invite-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.invite-meta span {
+  font-size: 11px;
+  color: #71717a;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.invite-copy-btn {
+  background: none;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  color: #d4d4d8;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.invite-copy-btn:hover {
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+.invite-copy-btn.copied {
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+.invite-delete-btn {
+  background: none;
+  border: 1px solid #3f3f46;
+  border-radius: 6px;
+  color: #71717a;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.invite-delete-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}

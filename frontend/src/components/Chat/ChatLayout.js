@@ -725,6 +725,8 @@ const ChatLayout = () => {
         )}
         onClose={closeSettingsModal}
         onSubmit={handleServerSettingsSubmit}
+        serverId={serverId}
+        isHost={isCurrentUserHost}
       />
 
       <EntitySettingsModal

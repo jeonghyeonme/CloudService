@@ -249,6 +249,8 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
           ...nextMessages[existingIndex],
           ...message,
           isOptimistic: false,
+          sendStatus: undefined, // ✅ 추가 - "전송 중..." 상태 해제
+          sendError: undefined,  // ✅ 추가 - 에러 메시지 초기화
         };
 
         return {

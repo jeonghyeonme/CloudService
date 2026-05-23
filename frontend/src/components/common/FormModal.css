@@ -334,3 +334,34 @@
     width: 100%;
   }
 }
+
+/* ── EntitySettingsModal 탭 ── */
+.entity-settings-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 16px;
+}
+
+.entity-settings-tab {
+  background: none;
+  border: none;
+  color: #71717a;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.entity-settings-tab:hover {
+  color: #d4d4d8;
+}
+
+.entity-settings-tab.active {
+  color: #ffffff;
+  border-bottom-color: #00ff66;
+}

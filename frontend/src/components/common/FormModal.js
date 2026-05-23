@@ -41,6 +41,7 @@ function FormModal({
   cancelLabel = "취소",
   onClose,
   onSubmit,
+  _embedded = false, // ✅ EntitySettingsModal 내부 임베드 시 overlay/헤더 숨김
 }) {
   const initialValues = useMemo(() => buildInitialValues(fields), [fields]);
   const [values, setValues] = useState(initialValues);
@@ -48,13 +49,13 @@ function FormModal({
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    if (open) {
+    if (open || _embedded) {
       setValues(initialValues);
       setSubmitError("");
     }
-  }, [initialValues, open]);
+  }, [initialValues, open, _embedded]);
 
-  if (!open) {
+  if (!open && !_embedded) {
     return null;
   }
 
@@ -66,7 +67,6 @@ function FormModal({
           nextValues[field.name] = field.defaultValue ?? (field.type === "file" ? null : "");
         }
       });
-
       return nextValues;
     });
   };
@@ -193,73 +193,48 @@ function FormModal({
     );
   };
 
+  const formBody = (
+    <form className="form-modal__form" onSubmit={handleSubmit}>
+      {_embedded && description && <p style={{ fontSize: "13px", color: "#a1a1aa", margin: "0 0 12px" }}>{description}</p>}
+      <div className="form-modal__grid">
+        {fields
+          .filter((field) => !field.showIf || field.showIf(values))
+          .map((field) => (
+            <div key={field.name} className={`form-modal__group ${field.width === "half" ? "form-modal__group--half" : ""}`}>
+              <label htmlFor={field.name}>{field.label}</label>
+              {renderField(field)}
+              {field.helperText && <span className="form-modal__helper">{field.helperText}</span>}
+            </div>
+          ))}
+      </div>
+      <div className="form-modal__footer">
+        {submitError ? <p className="form-modal__error">{submitError}</p> : <span className="form-modal__error-spacer" />}
+        <div className="form-modal__actions">
+          <button type="button" className="form-modal__button form-modal__button--ghost" onClick={onClose}>{cancelLabel}</button>
+          <button type="submit" className="form-modal__button form-modal__button--primary" disabled={isSubmitting}>
+            {isSubmitting ? "저장 중..." : submitLabel}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+ 
+  // ✅ 임베드 모드: overlay/헤더/닫기 버튼 없이 폼만 렌더링
+  if (_embedded) return formBody;
+ 
   return (
     <div className="form-modal__overlay" onClick={handleOverlayClick}>
       <div className="form-modal">
-        <button
-          type="button"
-          className="form-modal__close"
-          onClick={onClose}
-          aria-label="모달 닫기"
-          disabled={isSubmitting}
-        >
-          ✕
-        </button>
-
+        <button type="button" className="form-modal__close" onClick={onClose} aria-label="모달 닫기" disabled={isSubmitting}>✕</button>
         <div className="form-modal__header">
           <h2>{title}</h2>
-          {description ? <p>{description}</p> : null}
+          {description && <p>{description}</p>}
         </div>
-
-        <form className="form-modal__form" onSubmit={handleSubmit}>
-          <div className="form-modal__grid">
-            {fields
-              .filter((field) => {
-                if(!field.showIf) return true;
-                return field.showIf(values);
-              })
-              .map((field) => (
-                <div
-                  key={field.name}
-                  className={`form-modal__group ${field.width === "half" ? "form-modal__group--half" : ""}`}
-                >
-                  <label htmlFor={field.name}>{field.label}</label>
-                  {renderField(field)}
-                  {field.helperText ? (
-                    <span className="form-modal__helper">{field.helperText}</span>
-                  ) : null}
-                </div>
-              ))
-            }
-          </div>
-
-          <div className="form-modal__footer">
-            {submitError ? (
-              <p className="form-modal__error">{submitError}</p>
-            ) : (
-              <span className="form-modal__error-spacer" />
-            )}
-            <div className="form-modal__actions">
-              <button
-                type="button"
-                className="form-modal__button form-modal__button--ghost"
-                onClick={onClose}
-              >
-                {cancelLabel}
-              </button>
-              <button
-                type="submit"
-                className="form-modal__button form-modal__button--primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "저장 중..." : submitLabel}
-              </button>
-            </div>
-          </div>
-        </form>
+        {formBody}
       </div>
     </div>
   );
 }
-
+ 
+    
 export default FormModal;
