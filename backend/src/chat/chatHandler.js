@@ -23,8 +23,15 @@ const SERVER_MEMBERS_TABLE = process.env.SERVER_MEMBERS_TABLE;
 // WebSocket 클라이언트 생성
 // =========================
 function getApigwClient(domain, stage) {
+  const isOffline =
+    process.env.IS_OFFLINE === "true" || process.env.IS_OFFLINE === true;
+
+  const endpoint = isOffline
+    ? process.env.WS_MANAGEMENT_ENDPOINT || "http://localhost:4001"
+    : `https://${domain}/${stage}`;
+
   return new ApiGatewayManagementApiClient({
-    endpoint: `https://${domain}/${stage}`,
+    endpoint,
   });
 }
 
@@ -33,16 +40,21 @@ async function sendToConnection(apigw, connectionId, data) {
   try {
     await apigw.send(new PostToConnectionCommand({
       ConnectionId: connectionId,
-      Data:         Buffer.from(JSON.stringify(data)),
+      Data: Buffer.from(JSON.stringify(data)),
     }));
-  } catch {
-    // 연결 끊김 시 Delete 대신 serverId를 'DISCONNECTED'로 바꿔서 방에서 빼냅니다.
+  } catch (err) {
+    console.error("PostToConnection 실패:", {
+      connectionId,
+      name: err.name,
+      message: err.message,
+    });
+
     await dynamoDb.send(new UpdateCommand({
       TableName: CONNECTIONS_TABLE,
-      Key:       { connectionId },
+      Key: { connectionId },
       UpdateExpression: "SET serverId = :none",
-      ExpressionAttributeValues: { ":none": "DISCONNECTED" }
-    })).catch(() => {}); // 혹시 모를 권한 에러 무시
+      ExpressionAttributeValues: { ":none": "DISCONNECTED" },
+    })).catch(() => {});
   }
 }
 
