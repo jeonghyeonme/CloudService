@@ -35,7 +35,7 @@ ENV_VARS="{
     \"JWT_SECRET_KEY\":       \"PLACEHOLDER\",
     \"SALT\":                 \"PLACEHOLDER\",
     \"WSS_ENDPOINT\":         \"${WSS_ENDPOINT}\",
-    \"AI_QUEUE_URL\":         \"${AI_QUEUE_URL}\"
+    \"AI_QUEUE_URL\":         \"${AI_QUEUE_URL}\",
     \"INVITES_TABLE\":        \"${PREFIX}-Invites\"
   }
 }"
