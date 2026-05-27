@@ -170,7 +170,7 @@ const isImageUpload = (file) => Boolean(file?.type?.startsWith("image/"));
  * @param {boolean} isConnected - WebSocket 연결 상태
  * @param {object} chatMessageHandlerRef - ChatLayout에서 메시지 핸들러 등록용 ref
  */
-const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef }) => {
+const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef, typingUsers = {} }) => {
   const { user } = useAuth();
   const toast = useToast();
   const { serverId } = useParams();
@@ -196,6 +196,8 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
   const fileInputRef = useRef(null);
   const aiPendingTimeoutsRef = useRef(new Map()); // requestId → timeoutId
   const messageSendTimeoutsRef = useRef(new Map()); // clientMessageId -> timeoutId
+  const typingDebounceRef = useRef(null);
+  const lastTypingSentRef = useRef(false); // 마지막으로 보낸 isTyping 상태
 
   const activeChannelRef = useRef(activeChannel);
   useEffect(() => {
@@ -482,6 +484,12 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!serverId) return;
 
     const failedMessagesByChannel = Object.fromEntries(
@@ -615,6 +623,31 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     });
   }, []);
 
+  // ✅ 입력 중 상태 전송 (디바운스)
+  const sendTyping = useCallback((isTyping) => {
+    if (!serverId || !user?.userId || !isConnected) return;
+    if (lastTypingSentRef.current === isTyping) return; // 같은 상태면 스킵 (true/false 모두)
+    lastTypingSentRef.current = isTyping;
+    sendWsMessage?.("typing", {
+      serverId,
+      userId: user.userId,
+      nickname: user.nickname,
+      isTyping,
+    });
+  }, [serverId, user?.userId, user?.nickname, isConnected, sendWsMessage]);
+
+  const handleTypingInput = useCallback(() => {
+    // 입력 시작 → true (이미 true면 재전송 안 함)
+    if (!lastTypingSentRef.current) {
+      sendTyping(true);
+    }
+    // 2초간 추가 입력 없으면 false
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    typingDebounceRef.current = setTimeout(() => {
+      sendTyping(false);
+    }, 2000);
+  }, [sendTyping]);
+
   const handleSend = useCallback(async () => {
     const trimmed = inputText.trim();
 
@@ -675,6 +708,9 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     sendOptimisticMessage(payload);
 
     setInputText("");
+    // 메시지 전송 시 입력 중 상태 즉시 해제
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    sendTyping(false);
   }, [
     activeChannel,
     clearPendingImage,
@@ -687,6 +723,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     toast,
     user?.nickname,
     user?.userId,
+    sendTyping
   ]);
 
   // ✅ 검색 실행
@@ -1267,6 +1304,19 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
         </div>
       )}
 
+      {/* ✅ 입력 중 표시 (본인 제외) */}
+      {Object.keys(typingUsers).length > 0 && (
+        <div className="typing-indicator">
+          <span className="typing-dots">
+            <span></span><span></span><span></span>
+          </span>
+          <span className="typing-text">
+            {Object.values(typingUsers).slice(0, 3).join(", ")}
+            {Object.keys(typingUsers).length > 3 ? " 외 여러 명" : ""}님이 입력 중...
+          </span>
+        </div>
+      )}
+
       <div className="chat-input-area">
         <div className={`chat-upload-policy ${uploadFeedback ? "is-error" : ""}`}>
           {uploadFeedback || `업로드 가능 형식: ${UPLOAD_POLICY_LABEL}`}
@@ -1321,6 +1371,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
               if (uploadFeedback) {
                 setUploadFeedback("");
               }
+              handleTypingInput();
             }}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
