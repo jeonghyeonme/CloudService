@@ -61,12 +61,14 @@ const ChatLayout = () => {
   const [onlineUserIds, setOnlineUserIds] = useState([]);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [moderationMembers, setModerationMembers] = useState([]);
+  const [typingUsers, setTypingUsers] = useState({}); // { userId: nickname }
 
   // ✅ 서버 변경 시 이전 서버의 실시간/모달 상태 초기화
   useEffect(() => {
     setOnlineUserIds([]);
     setModerationMembers([]);
     setIsMemberModalOpen(false);
+    setTypingUsers({});
   }, [serverId]);
 
   const handleLogout = async () => {
@@ -142,6 +144,21 @@ const ChatLayout = () => {
       // ✅ 다른 사람 퇴장 알림
       if (action === "userLeft" && data?.userId) {
         setOnlineUserIds((prev) => prev.filter((id) => id !== data.userId));
+        return;
+      }
+
+      // ✅ 입력 중 상태 (typing) — 본인은 브로드캐스트에서 제외되어 안 옴
+      if (action === "typing" && data?.userId) {
+        setTypingUsers((prev) => {
+          if (data.isTyping) {
+            if (prev[data.userId] === data.nickname) return prev;
+            return { ...prev, [data.userId]: data.nickname || "사용자" };
+          }
+          if (!(data.userId in prev)) return prev;
+          const next = { ...prev };
+          delete next[data.userId];
+          return next;
+        });
         return;
       }
 
@@ -671,6 +688,7 @@ const ChatLayout = () => {
             sendWsMessage={sendWsMessage}
             isConnected={isConnected}
             chatMessageHandlerRef={chatMessageHandlerRef}
+            typingUsers={typingUsers}
           />
         )}
 

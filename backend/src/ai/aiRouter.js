@@ -1,8 +1,8 @@
 const { TextractClient, StartDocumentTextDetectionCommand, GetDocumentTextDetectionCommand } = require("@aws-sdk/client-textract");
 const { RekognitionClient, DetectLabelsCommand, DetectTextCommand } = require("@aws-sdk/client-rekognition");
 const { TranslateClient, TranslateTextCommand } = require("@aws-sdk/client-translate");
-const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
-
+const { BedrockRuntimeClient, InvokeModelCommand, ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { PutCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
 const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");
 const { v4: uuidv4 } = require("uuid");
@@ -20,6 +20,7 @@ const textract    = new TextractClient({ region: REGION });
 const rekognition = new RekognitionClient({ region: REGION });
 const translate   = new TranslateClient({ region: REGION });
 const bedrock     = new BedrockRuntimeClient({ region: REGION });
+const s3          = new S3Client({ region: REGION });
 
 // Textract 결과 폴링 (비동기 작업 완료 대기)
 async function waitForTextract(jobId) {
@@ -55,6 +56,28 @@ async function summarizeWithBedrock(text) {
   const responseBody = JSON.parse(new TextDecoder().decode(response.body));
   return responseBody.content[0].text;
 }
+
+// PDF를 Bedrock Converse로 직접 분석 (Textract 우회 — 한국어 OCR 정확)
+async function summarizeWithBedrockPdf(s3ObjectKey) {
+  const obj = await s3.send(new GetObjectCommand({ Bucket: RESOURCES_BUCKET, Key: s3ObjectKey }));
+  const chunks = [];
+  const pdfBytes = Buffer.from(await obj.Body.transformToByteArray());
+
+  const response = await bedrock.send(new ConverseCommand({
+    modelId: "anthropic.claude-3-haiku-20240307-v1:0",
+    messages: [{
+      role: "user",
+      content: [
+        { document: { format: "pdf", name: "doc", source: { bytes: pdfBytes } } },
+        { text: "이 문서를 한국어로 간결하게 요약해주세요. 핵심 포인트를 불렛으로 정리해주세요." }
+      ]
+    }],
+    inferenceConfig: { maxTokens: 1024 },
+  }));
+  return response.output.message.content[0].text;
+}
+
+
 
 // =========================
 // SQS 트리거 핸들러
@@ -94,23 +117,15 @@ async function processAiAnalysis(body) {
     return;
   }
 
-  console.log("aiRouter 분석 시작:", { s3ObjectKey, fileType, serverId, requestId });
-
   let result = {};
 
-  // ── 1. PDF/문서 → Textract + Bedrock 요약 ──
+  // ── 1. PDF/문서 → Bedrock 요약 ──
   if (fileType.includes("pdf") || fileType.includes("document")) {
-    const textractResponse = await textract.send(new StartDocumentTextDetectionCommand({
-      DocumentLocation: { S3Object: { Bucket: RESOURCES_BUCKET, Name: s3ObjectKey } },
-    }));
-    const extractedText = await waitForTextract(textractResponse.JobId);
-    const summary = await summarizeWithBedrock(extractedText);
-
+    const summary = await summarizeWithBedrockPdf(s3ObjectKey);
     result = {
       type: "document",
       status: "COMPLETE",
       fileName: fileName || s3ObjectKey.split("/").pop(),
-      extractedText: extractedText.slice(0, 2000),
       summary,
     };
   }
