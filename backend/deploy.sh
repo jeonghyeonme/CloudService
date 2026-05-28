@@ -35,7 +35,7 @@ ENV_VARS="{
     \"JWT_SECRET_KEY\":       \"PLACEHOLDER\",
     \"SALT\":                 \"PLACEHOLDER\",
     \"WSS_ENDPOINT\":         \"${WSS_ENDPOINT}\",
-    \"AI_QUEUE_URL\":         \"${AI_QUEUE_URL}\"
+    \"AI_QUEUE_URL\":         \"${AI_QUEUE_URL}\",
     \"INVITES_TABLE\":        \"${PREFIX}-Invites\"
   }
 }"
@@ -49,6 +49,9 @@ FUNCTIONS=(
   "${PREFIX}-${STAGE}-userLogin|src/auth/userLogin.handler"
   "${PREFIX}-${STAGE}-userLogout|src/auth/userLogout.handler"
   "${PREFIX}-${STAGE}-tokenRefresh|src/auth/tokenRefresh.handler"
+  "${PREFIX}-${STAGE}-getMyUserProfile|src/users/profile.getMe"
+  "${PREFIX}-${STAGE}-updateMyUserProfile|src/users/profile.updateMe"
+  "${PREFIX}-${STAGE}-getUserProfile|src/users/profile.getUser"
   "${PREFIX}-${STAGE}-getMessages|src/chat/getMessages.handler"
   "${PREFIX}-${STAGE}-chatHandler|src/chat/chatHandler.handler"
   "${PREFIX}-${STAGE}-addChannel|src/servers/addChannel.handler"
