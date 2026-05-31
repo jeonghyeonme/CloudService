@@ -113,6 +113,13 @@
   color: #00ff66;
   font-size: 14px;
   font-weight: 700;
+  overflow: hidden;
+}
+
+.profile-icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
  
 /* 설정 팝업 */

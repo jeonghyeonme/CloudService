@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getServerPath, PATHS } from "../../constants/path";
+import { getServerPath } from "../../constants/path";
 import { useAuth } from "../../contexts/AuthContext";
 import { useServers } from "../../contexts/ServerContext";
 import { getServerId, getServerName } from "../../lib/serverEntity";
+import ProfileEditModal from "../Profile/ProfileEditModal";
 import "./ServerSidebar.css";
 
 function handleRightClick(event, callback, payload) {
@@ -32,6 +33,7 @@ const ServerSidebar = ({
   const { user } = useAuth();
   const { joinedServers, activeServerId } = useServers();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const menuRef = useRef(null);
 
   const initial = user?.nickname ? user.nickname.charAt(0) : "프";
@@ -53,7 +55,7 @@ const ServerSidebar = ({
 
   const handleProfileEdit = () => {
     setIsProfileMenuOpen(false);
-    navigate(PATHS.profileEdit || "/profile/edit");
+    setIsProfileEditOpen(true);
   };
 
   return (
@@ -127,9 +129,22 @@ const ServerSidebar = ({
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
           title={user?.nickname || "프로필"}
         >
-          {initial}
+          {user?.profileImageUrl ? (
+            <img
+              src={user.profileImageUrl}
+              alt={user?.nickname || "프로필"}
+              className="profile-icon-image"
+            />
+          ) : (
+            initial
+          )}
         </div>
       </div>
+
+      <ProfileEditModal
+        open={isProfileEditOpen}
+        onClose={() => setIsProfileEditOpen(false)}
+      />
     </nav>
   );
 };
