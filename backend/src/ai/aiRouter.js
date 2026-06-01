@@ -57,24 +57,67 @@ async function summarizeWithBedrock(text) {
   return responseBody.content[0].text;
 }
 
-// PDF를 Bedrock Converse로 직접 분석 (Textract 우회 — 한국어 OCR 정확)
 async function summarizeWithBedrockPdf(s3ObjectKey) {
   const obj = await s3.send(new GetObjectCommand({ Bucket: RESOURCES_BUCKET, Key: s3ObjectKey }));
-  const chunks = [];
   const pdfBytes = Buffer.from(await obj.Body.transformToByteArray());
 
+  // 1차: Converse document로 텍스트 PDF 처리 시도
   const response = await bedrock.send(new ConverseCommand({
     modelId: "anthropic.claude-3-haiku-20240307-v1:0",
     messages: [{
       role: "user",
       content: [
         { document: { format: "pdf", name: "doc", source: { bytes: pdfBytes } } },
-        { text: "이 문서를 한국어로 간결하게 요약해주세요. 핵심 포인트를 불렛으로 정리해주세요." }
+        { text: "이 문서를 한국어로 간결하게 요약해주세요. 핵심 포인트를 불렛으로 정리해주세요. 문서가 비어있거나 텍스트를 추출할 수 없으면 정확히 'NO_TEXT_LAYER'라고만 답해주세요." }
       ]
     }],
     inferenceConfig: { maxTokens: 1024 },
   }));
-  return response.output.message.content[0].text;
+  const text = response.output.message.content[0].text;
+
+  // 텍스트 레이어 없음 감지 → 스캔 PDF 이미지 변환 폴백
+  if (text.includes("NO_TEXT_LAYER") || text.trim().length < 50) {
+    console.log("텍스트 레이어 없음 감지. 스캔 PDF 이미지 변환 폴백 시작");
+    return await summarizeScannedPdf(pdfBytes);
+  }
+  return text;
+}
+
+// 스캔 PDF 처리: PDF → PNG 변환 → Claude 멀티모달
+async function summarizeScannedPdf(pdfBytes) {
+  // mupdf는 ESM + top-level await라 동적 import 필수
+  const mupdf = await import("mupdf");
+  const doc = mupdf.Document.openDocument(pdfBytes, "application/pdf");
+  const totalPages = doc.countPages();
+  const pagesToProcess = Math.min(totalPages, 5);
+
+  console.log(`스캔 PDF: 전체 ${totalPages}페이지 중 ${pagesToProcess}페이지 변환`);
+
+  const imageBlocks = [];
+  for (let i = 0; i < pagesToProcess; i++) {
+    const page = doc.loadPage(i);
+    const pixmap = page.toPixmap(mupdf.Matrix.scale(2, 2), mupdf.ColorSpace.DeviceRGB);
+    const pngBuffer = pixmap.asPNG();
+    imageBlocks.push({ image: { format: "png", source: { bytes: pngBuffer } } });
+  }
+
+  const response = await bedrock.send(new ConverseCommand({
+    modelId: "anthropic.claude-3-haiku-20240307-v1:0",
+    messages: [{
+      role: "user",
+      content: [
+        ...imageBlocks,
+        { text: `이 이미지들은 PDF 문서의 첫 ${pagesToProcess}페이지를 변환한 것입니다 (전체 ${totalPages}페이지). 한국어 텍스트를 정확히 읽고 핵심 내용을 한국어로 간결하게 요약해주세요. 핵심 포인트를 불렛으로 정리해주세요.` }
+      ]
+    }],
+    inferenceConfig: { maxTokens: 2048 },
+  }));
+
+  let summary = response.output.message.content[0].text;
+  if (totalPages > pagesToProcess) {
+    summary += `\n\n_※ 전체 ${totalPages}페이지 중 첫 ${pagesToProcess}페이지만 분석했습니다._`;
+  }
+  return summary;
 }
 
 
