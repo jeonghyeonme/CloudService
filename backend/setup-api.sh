@@ -72,6 +72,14 @@ TOKEN_ID=$(create_resource "$ROOT_ID" "token")
 echo "  /token → $TOKEN_ID"
 REFRESH_ID=$(create_resource "$TOKEN_ID" "refresh")
 echo "  /token/refresh → $REFRESH_ID"
+
+USERS_ID=$(create_resource "$ROOT_ID" "users")
+echo "  /users → $USERS_ID"
+USERS_ME_ID=$(create_resource "$USERS_ID" "me")
+echo "  /users/me → $USERS_ME_ID"
+USER_ID_PARAM_ID=$(create_resource "$USERS_ID" "{userId}")
+echo "  /users/{userId} → $USER_ID_PARAM_ID"
+
 SERVER_ID_PARAM_ID=$(create_resource "$SERVERS_ID" "{serverId}")
 echo "  /servers/{serverId} → $SERVER_ID_PARAM_ID"
 JOIN_ID=$(create_resource "$SERVER_ID_PARAM_ID" "join")
@@ -106,6 +114,12 @@ setup_endpoint "$REGISTER_ID"        "POST"   "${PREFIX}-${STAGE}-userRegister" 
 setup_endpoint "$LOGIN_ID"           "POST"   "${PREFIX}-${STAGE}-userLogin"          "userLogin"
 setup_endpoint "$LOGOUT_ID"          "DELETE" "${PREFIX}-${STAGE}-userLogout"         "userLogout"
 setup_endpoint "$REFRESH_ID"         "POST"   "${PREFIX}-${STAGE}-tokenRefresh"       "token/refresh"
+
+setup_endpoint "$USERS_ME_ID"        "GET"    "${PREFIX}-${STAGE}-getMyUserProfile"   "users/me"
+setup_endpoint "$USERS_ME_ID"        "PATCH"  "${PREFIX}-${STAGE}-updateMyUserProfile" "users/me"
+setup_endpoint "$USERS_ME_ID"        "PUT"    "${PREFIX}-${STAGE}-updateMyUserProfile" "users/me"
+setup_endpoint "$USER_ID_PARAM_ID"   "GET"    "${PREFIX}-${STAGE}-getUserProfile"     "users/{userId}"
+
 setup_endpoint "$CHANNELS_ID"        "POST"   "${PREFIX}-${STAGE}-addChannel"         "servers/{serverId}/channels"
 setup_endpoint "$CH_ID_PARAM_ID"     "DELETE" "${PREFIX}-${STAGE}-deleteChannel"      "servers/{serverId}/channels/{chId}"
 setup_endpoint "$UPLOAD_URL_ID"      "GET"    "${PREFIX}-${STAGE}-getUploadUrl"       "resources/upload-url"
@@ -126,6 +140,8 @@ setup_cors "$REGISTER_ID"
 setup_cors "$LOGIN_ID"
 setup_cors "$LOGOUT_ID"
 setup_cors "$REFRESH_ID"
+setup_cors "$USERS_ME_ID"
+setup_cors "$USER_ID_PARAM_ID"
 setup_cors "$CHANNELS_ID"
 setup_cors "$CH_ID_PARAM_ID"
 setup_cors "$UPLOAD_URL_ID"
