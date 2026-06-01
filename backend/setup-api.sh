@@ -54,7 +54,7 @@ setup_cors() {
   aws apigateway put-method --rest-api-id "$API_ID" --resource-id "$RESOURCE_ID" --http-method OPTIONS --authorization-type "NONE" --region "$REGION" > /dev/null 2>&1 || true
   aws apigateway put-integration --rest-api-id "$API_ID" --resource-id "$RESOURCE_ID" --http-method OPTIONS --type MOCK --request-templates '{"application/json":"{\"statusCode\":200}"}' --region "$REGION" > /dev/null 2>&1 || true
   aws apigateway put-method-response --rest-api-id "$API_ID" --resource-id "$RESOURCE_ID" --http-method OPTIONS --status-code 200 --response-parameters '{"method.response.header.Access-Control-Allow-Headers":false,"method.response.header.Access-Control-Allow-Methods":false,"method.response.header.Access-Control-Allow-Origin":false}' --region "$REGION" > /dev/null 2>&1 || true
-  aws apigateway put-integration-response --rest-api-id "$API_ID" --resource-id "$RESOURCE_ID" --http-method OPTIONS --status-code 200 --response-parameters "{\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization'\",\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,DELETE,OPTIONS'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"}" --region "$REGION" > /dev/null 2>&1 || true
+  aws apigateway put-integration-response --rest-api-id "$API_ID" --resource-id "$RESOURCE_ID" --http-method OPTIONS --status-code 200 --response-parameters "{\"method.response.header.Access-Control-Allow-Headers\":\"'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'\",\"method.response.header.Access-Control-Allow-Methods\":\"'GET,POST,PUT,PATCH,DELETE,OPTIONS'\",\"method.response.header.Access-Control-Allow-Origin\":\"'*'\"}" --region "$REGION" > /dev/null 2>&1 || true
 }
 
 echo ""
@@ -72,14 +72,12 @@ TOKEN_ID=$(create_resource "$ROOT_ID" "token")
 echo "  /token → $TOKEN_ID"
 REFRESH_ID=$(create_resource "$TOKEN_ID" "refresh")
 echo "  /token/refresh → $REFRESH_ID"
-
 USERS_ID=$(create_resource "$ROOT_ID" "users")
 echo "  /users → $USERS_ID"
 USERS_ME_ID=$(create_resource "$USERS_ID" "me")
 echo "  /users/me → $USERS_ME_ID"
 USER_ID_PARAM_ID=$(create_resource "$USERS_ID" "{userId}")
 echo "  /users/{userId} → $USER_ID_PARAM_ID"
-
 SERVER_ID_PARAM_ID=$(create_resource "$SERVERS_ID" "{serverId}")
 echo "  /servers/{serverId} → $SERVER_ID_PARAM_ID"
 JOIN_ID=$(create_resource "$SERVER_ID_PARAM_ID" "join")
@@ -114,12 +112,10 @@ setup_endpoint "$REGISTER_ID"        "POST"   "${PREFIX}-${STAGE}-userRegister" 
 setup_endpoint "$LOGIN_ID"           "POST"   "${PREFIX}-${STAGE}-userLogin"          "userLogin"
 setup_endpoint "$LOGOUT_ID"          "DELETE" "${PREFIX}-${STAGE}-userLogout"         "userLogout"
 setup_endpoint "$REFRESH_ID"         "POST"   "${PREFIX}-${STAGE}-tokenRefresh"       "token/refresh"
-
 setup_endpoint "$USERS_ME_ID"        "GET"    "${PREFIX}-${STAGE}-getMyUserProfile"   "users/me"
 setup_endpoint "$USERS_ME_ID"        "PATCH"  "${PREFIX}-${STAGE}-updateMyUserProfile" "users/me"
 setup_endpoint "$USERS_ME_ID"        "PUT"    "${PREFIX}-${STAGE}-updateMyUserProfile" "users/me"
 setup_endpoint "$USER_ID_PARAM_ID"   "GET"    "${PREFIX}-${STAGE}-getUserProfile"     "users/{userId}"
-
 setup_endpoint "$CHANNELS_ID"        "POST"   "${PREFIX}-${STAGE}-addChannel"         "servers/{serverId}/channels"
 setup_endpoint "$CH_ID_PARAM_ID"     "DELETE" "${PREFIX}-${STAGE}-deleteChannel"      "servers/{serverId}/channels/{chId}"
 setup_endpoint "$UPLOAD_URL_ID"      "GET"    "${PREFIX}-${STAGE}-getUploadUrl"       "resources/upload-url"

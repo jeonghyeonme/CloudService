@@ -13,6 +13,16 @@ export const ENDPOINTS = {
     refresh: "/token/refresh",
     logout: "/userLogout",
   },
+  profile: {
+    me: process.env.REACT_APP_PROFILE_ME_ENDPOINT || "",
+    update: process.env.REACT_APP_PROFILE_UPDATE_ENDPOINT || "",
+    uploadUrl:
+      process.env.REACT_APP_PROFILE_UPLOAD_URL_ENDPOINT ||
+      "",
+  },
+  resources: {
+    uploadUrl: "/resources/upload-url",
+  },
   servers: {
     list: "/servers",
     mine: "/servers/me",
