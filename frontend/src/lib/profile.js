@@ -1,5 +1,7 @@
-import { getUploadUrl } from "./resources";
+import { ENDPOINTS } from "../constants/endpoint";
 import { request } from "./request";
+
+const DEFAULT_PROFILE_PATH = "/users/me";
 
 const PROFILE_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -23,6 +25,30 @@ const PROFILE_IMAGE_TYPES_BY_EXTENSION = {
   tiff: "image/tiff",
 };
 
+function hasPath(path) {
+  return typeof path === "string" && path.trim() !== "";
+}
+
+function getProfileReadPath() {
+  return hasPath(ENDPOINTS.profile.me)
+    ? ENDPOINTS.profile.me
+    : DEFAULT_PROFILE_PATH;
+}
+
+function getProfileUpdatePath() {
+  return hasPath(ENDPOINTS.profile.update)
+    ? ENDPOINTS.profile.update
+    : DEFAULT_PROFILE_PATH;
+}
+
+export function canUseProfileReadApi() {
+  return hasPath(getProfileReadPath());
+}
+
+export function canUseProfileUpdateApi() {
+  return hasPath(getProfileUpdatePath());
+}
+
 export function getProfileImageContentType(file) {
   if (file?.type && PROFILE_IMAGE_TYPES.has(file.type)) {
     return file.type;
@@ -36,10 +62,37 @@ export function getProfileImageContentType(file) {
   return PROFILE_IMAGE_TYPES_BY_EXTENSION[extension] || "";
 }
 
-export function updateProfile(payload) {
-  return request("/users/me", {
+export function getMyProfile() {
+  if (!canUseProfileReadApi()) {
+    return null;
+  }
+
+  return request(getProfileReadPath(), {
+    method: "GET",
+  });
+}
+
+export function updateMyProfile(payload) {
+  if (!canUseProfileUpdateApi()) {
+    throw new Error(
+      "프로필 수정 API가 설정되지 않았습니다. REACT_APP_PROFILE_UPDATE_ENDPOINT를 확인해 주세요.",
+    );
+  }
+
+  return request(getProfileUpdatePath(), {
     method: "PATCH",
     body: JSON.stringify(payload),
+  });
+}
+
+export function getProfileImageUploadUrl(fileName, fileType) {
+  const basePath = hasPath(ENDPOINTS.profile.uploadUrl)
+    ? ENDPOINTS.profile.uploadUrl
+    : ENDPOINTS.resources.uploadUrl;
+  const params = new URLSearchParams({ fileName, fileType });
+
+  return request(`${basePath}?${params.toString()}`, {
+    method: "GET",
   });
 }
 
@@ -53,7 +106,11 @@ export async function uploadProfileImage(file, profilePayload = {}) {
     throw new Error("프로필 사진은 이미지 파일만 사용할 수 있습니다.");
   }
 
-  const { uploadUrl, fileUrl, s3ObjectKey } = await getUploadUrl(file.name, fileType);
+  const { uploadUrl, fileUrl, s3ObjectKey } = await getProfileImageUploadUrl(
+    file.name,
+    fileType,
+  );
+
   if (!uploadUrl || !s3ObjectKey) {
     throw new Error("S3 업로드 URL을 발급받지 못했습니다.");
   }
@@ -70,7 +127,7 @@ export async function uploadProfileImage(file, profilePayload = {}) {
     throw new Error(`S3 프로필 이미지 업로드에 실패했습니다. (${uploadResponse.status})`);
   }
 
-  const result = await updateProfile({
+  const result = await updateMyProfile({
     ...profilePayload,
     profileImage: {
       fileName: file.name,
@@ -88,7 +145,7 @@ export async function uploadProfileImage(file, profilePayload = {}) {
 }
 
 export function removeProfileImage(profilePayload = {}) {
-  return updateProfile({
+  return updateMyProfile({
     ...profilePayload,
     removeProfileImage: true,
   });
