@@ -9,6 +9,7 @@ export const PATHS = {
   login: "/login",
   register: "/register",
   explore: "/explore",
+  profileEdit: "/profile/edit",
   server: "/servers/:serverId",
 };
 

@@ -98,17 +98,18 @@ exports.handler = async (event) => {
       Key: { userId },
     }));
     const nickname = userResult.Item?.nickname || "Unknown";
+    const profileImageUrl = userResult.Item?.profileImageUrl || null;
 
     // 7. ServerMembers 테이블에 멤버십 추가
     const joinedAt = new Date().toISOString();
     await dynamoDb.send(new PutCommand({
       TableName: process.env.SERVER_MEMBERS_TABLE,
-      Item: { userId, serverId, nickname, role: "MEMBER", joinedAt },
+      Item: { userId, serverId, nickname, profileImageUrl, role: "MEMBER", joinedAt },
     }));
 
     // 8. Servers 테이블의 members 배열과 currentCount 업데이트
     const currentMembers = Array.isArray(serverResult.Item.members) ? serverResult.Item.members : [];
-    const newMembers = [...currentMembers, { userId, nickname, role: "MEMBER", joinedAt }];
+    const newMembers = [...currentMembers, { userId, nickname, profileImageUrl, role: "MEMBER", joinedAt }];
 
     await dynamoDb.send(new UpdateCommand({
       TableName: process.env.SERVERS_TABLE,

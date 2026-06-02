@@ -31,6 +31,17 @@ const ChannelSkeleton = () => (
   </div>
 );
 
+function MemberAvatar({ member }) {
+  const imageUrl = member?.profileImageUrl;
+  const initial = member?.nickname ? member.nickname.charAt(0).toUpperCase() : "?";
+
+  return (
+    <div className={`avatar ${imageUrl ? "avatar-has-image" : ""}`}>
+      {imageUrl ? <img src={imageUrl} alt={member?.nickname || "profile"} /> : initial}
+    </div>
+  );
+}
+
 const SidebarLeft = ({
   serverName,
   channels,
@@ -125,7 +136,7 @@ const SidebarLeft = ({
               onContextMenu={(event) => handleRightClick(event, onMemberContextMenu, m)}
             >
               <div className="avatar-wrapper">
-                <div className="avatar">{m.nickname?.charAt(0).toUpperCase()}</div>
+                <MemberAvatar member={m} />
                 <div className="status-dot"></div>
               </div>
               <span className="name green-text">
@@ -149,7 +160,7 @@ const SidebarLeft = ({
                   onContextMenu={(event) => handleRightClick(event, onMemberContextMenu, m)}
                 >
                   <div className="avatar-wrapper">
-                    <div className="avatar">{m.nickname?.charAt(0).toUpperCase()}</div>
+                    <MemberAvatar member={m} />
                   </div>
                   <span className="name">
                     {m.nickname}

@@ -28,13 +28,15 @@ exports.handler = async (event) => {
       userId: access.userId,
       serverId,
       nickname: access.server.hostNickname || "Previous Host",
+      profileImageUrl: access.server.hostProfileImageUrl || null,
       joinedAt: access.server.createdAt || new Date().toISOString(),
     };
 
     const now = new Date().toISOString();
     const newHostNickname = targetMembership.Item.nickname || "New Host";
+    const newHostProfileImageUrl = targetMembership.Item.profileImageUrl || null;
     let updatedMembers = normalizeMembers(access.server).map((member) => {
-      if (member.userId === targetUserId) return { ...member, role: ROLE.HOST, nickname: newHostNickname };
+      if (member.userId === targetUserId) return { ...member, role: ROLE.HOST, nickname: newHostNickname, profileImageUrl: newHostProfileImageUrl };
       if (member.userId === access.userId) return { ...member, role: ROLE.MODERATOR };
       return member;
     });
@@ -43,6 +45,7 @@ exports.handler = async (event) => {
       updatedMembers.push({
         userId: targetUserId,
         nickname: newHostNickname,
+        profileImageUrl: newHostProfileImageUrl,
         role: ROLE.HOST,
         joinedAt: targetMembership.Item.joinedAt || now,
       });
@@ -52,6 +55,7 @@ exports.handler = async (event) => {
       updatedMembers.push({
         userId: access.userId,
         nickname: oldHostMembership.nickname,
+        profileImageUrl: oldHostMembership.profileImageUrl || null,
         role: ROLE.MODERATOR,
         joinedAt: oldHostMembership.joinedAt || now,
       });
@@ -70,10 +74,11 @@ exports.handler = async (event) => {
     await dynamoDb.send(new UpdateCommand({
       TableName: process.env.SERVERS_TABLE,
       Key: { serverId },
-      UpdateExpression: "SET hostId = :hostId, hostNickname = :hostNickname, members = :members, updatedAt = :updatedAt",
+      UpdateExpression: "SET hostId = :hostId, hostNickname = :hostNickname, hostProfileImageUrl = :hostProfileImageUrl, members = :members, updatedAt = :updatedAt",
       ExpressionAttributeValues: {
         ":hostId": targetUserId,
         ":hostNickname": newHostNickname,
+        ":hostProfileImageUrl": newHostProfileImageUrl,
         ":members": updatedMembers,
         ":updatedAt": now,
       },

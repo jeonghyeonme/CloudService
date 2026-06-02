@@ -1,6 +1,51 @@
-const { QueryCommand } = require("@aws-sdk/lib-dynamodb");
+const { QueryCommand, BatchGetCommand } = require("@aws-sdk/lib-dynamodb");
 const dynamoDb = require("../dynamodbClient");
 const { HEADERS } = require("../utils/response");
+
+async function getUsersById(userIds) {
+  const uniqueUserIds = [...new Set(userIds.filter(Boolean))];
+  if (!uniqueUserIds.length || !process.env.USERS_TABLE) return {};
+
+  const usersById = {};
+  for (let i = 0; i < uniqueUserIds.length; i += 100) {
+    const chunk = uniqueUserIds.slice(i, i + 100);
+    const result = await dynamoDb.send(new BatchGetCommand({
+      RequestItems: {
+        [process.env.USERS_TABLE]: {
+          Keys: chunk.map((userId) => ({ userId })),
+        },
+      },
+    }));
+
+    for (const user of result.Responses?.[process.env.USERS_TABLE] || []) {
+      usersById[user.userId] = user;
+    }
+  }
+
+  return usersById;
+}
+
+async function attachSenderProfiles(messages) {
+  const senderIds = messages.map((message) => message.senderId).filter(Boolean);
+  if (!senderIds.length) return messages;
+
+  try {
+    const usersById = await getUsersById(senderIds);
+    return messages.map((message) => ({
+      ...message,
+      senderProfileImageUrl:
+        usersById[message.senderId]?.profileImageUrl ??
+        message.senderProfileImageUrl ??
+        null,
+    }));
+  } catch (error) {
+    console.warn("Failed to attach sender profile images:", error);
+    return messages.map((message) => ({
+      ...message,
+      senderProfileImageUrl: message.senderProfileImageUrl || null,
+    }));
+  }
+}
 
 exports.handler = async (event) => {
   try {
@@ -38,11 +83,12 @@ exports.handler = async (event) => {
     }
 
     const result = await dynamoDb.send(new QueryCommand(params));
+    const messages = await attachSenderProfiles(result.Items || []);
 
     return {
       statusCode: 200,
       headers: HEADERS,
-      body: JSON.stringify(result.Items),
+      body: JSON.stringify(messages),
     };
   } catch (error) {
     console.error("getMessages Error:", error);

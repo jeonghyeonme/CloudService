@@ -35,6 +35,7 @@ const ServerSidebar = ({
   const menuRef = useRef(null);
 
   const initial = user?.nickname ? user.nickname.charAt(0) : "프";
+  const profileImageUrl = user?.profileImageUrl;
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -123,11 +124,15 @@ const ServerSidebar = ({
 
         {/* 프로필 아바타 버튼 */}
         <div
-          className="server-icon profile-icon"
+          className={`server-icon profile-icon ${profileImageUrl ? "has-image" : ""}`}
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
           title={user?.nickname || "프로필"}
         >
-          {initial}
+          {profileImageUrl ? (
+            <img src={profileImageUrl} alt={user?.nickname || "프로필"} />
+          ) : (
+            initial
+          )}
         </div>
       </div>
     </nav>

@@ -113,6 +113,18 @@
   color: #00ff66;
   font-size: 14px;
   font-weight: 700;
+  overflow: hidden;
+}
+
+.profile-icon.has-image {
+  background-color: #18181b;
+}
+
+.profile-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
  
 /* 설정 팝업 */

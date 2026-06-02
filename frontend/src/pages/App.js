@@ -13,6 +13,7 @@ import Login from "../components/Auth/Login";
 import Register from "../components/Auth/Register";
 import ChatLayout from "../components/Chat/ChatLayout";
 import ExploreServers from "../components/Servers/ExploreServers";
+import ProfileEdit from "../components/Profile/ProfileEdit";
 import NotFound from "../components/NotFound/NotFound";
 import SharedLayout from "../components/layout/SharedLayout";
 import { PATHS } from "../constants/path";
@@ -101,6 +102,14 @@ function AppRoutes() {
           }
         />
         {/* 404 Not Found 페이지 처리 */}
+        <Route
+          path={PATHS.profileEdit}
+          element={
+            <ProtectedRoute>
+              <ProfileEdit />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </SharedLayout>
