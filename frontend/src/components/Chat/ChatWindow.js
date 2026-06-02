@@ -180,7 +180,7 @@ function MessageAvatar({ imageUrl, label }) {
  * @param {boolean} isConnected - WebSocket 연결 상태
  * @param {object} chatMessageHandlerRef - ChatLayout에서 메시지 핸들러 등록용 ref
  */
-const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef }) => {
+const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef, typingUsers = {} }) => {
   const { user } = useAuth();
   const toast = useToast();
   const { serverId } = useParams();
@@ -193,19 +193,24 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
   const [isComposing, setIsComposing] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
   const [uploadFeedback, setUploadFeedback] = useState("");
+
   // ✅ 검색 관련 state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const messageRefsMap = useRef({}); // ✅ messageId → DOM ref 맵
   const searchInputRef = useRef(null);
   const searchTimerRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const dragDepthRef = useRef(0);
-  const messagesEndRef = useRef(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   const fileInputRef = useRef(null);
   const aiPendingTimeoutsRef = useRef(new Map()); // requestId → timeoutId
   const messageSendTimeoutsRef = useRef(new Map()); // clientMessageId -> timeoutId
+  const typingDebounceRef = useRef(null);
+  const lastTypingSentRef = useRef(false); // 마지막으로 보낸 isTyping 상태
 
   const activeChannelRef = useRef(activeChannel);
   useEffect(() => {
@@ -493,6 +498,12 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!serverId) return;
 
     const failedMessagesByChannel = Object.fromEntries(
@@ -627,6 +638,31 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     });
   }, []);
 
+  // ✅ 입력 중 상태 전송 (디바운스)
+  const sendTyping = useCallback((isTyping) => {
+    if (!serverId || !user?.userId || !isConnected) return;
+    if (lastTypingSentRef.current === isTyping) return; // 같은 상태면 스킵 (true/false 모두)
+    lastTypingSentRef.current = isTyping;
+    sendWsMessage?.("typing", {
+      serverId,
+      userId: user.userId,
+      nickname: user.nickname,
+      isTyping,
+    });
+  }, [serverId, user?.userId, user?.nickname, isConnected, sendWsMessage]);
+
+  const handleTypingInput = useCallback(() => {
+    // 입력 시작 → true (이미 true면 재전송 안 함)
+    if (!lastTypingSentRef.current) {
+      sendTyping(true);
+    }
+    // 2초간 추가 입력 없으면 false
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    typingDebounceRef.current = setTimeout(() => {
+      sendTyping(false);
+    }, 2000);
+  }, [sendTyping]);
+
   const handleSend = useCallback(async () => {
     const trimmed = inputText.trim();
 
@@ -688,6 +724,9 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     sendOptimisticMessage(payload);
 
     setInputText("");
+    // 메시지 전송 시 입력 중 상태 즉시 해제
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    sendTyping(false);
   }, [
     activeChannel,
     clearPendingImage,
@@ -701,6 +740,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     user?.nickname,
     user?.profileImageUrl,
     user?.userId,
+    sendTyping
   ]);
 
   // ✅ 검색 실행
@@ -731,6 +771,17 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       return !prev;
     });
   }, []);
+
+  // ✅ 검색 결과 클릭 → 해당 메시지로 스크롤 + 하이라이트
+  const handleSearchResultClick = useCallback((messageId) => {
+    handleToggleSearch(); // 검색창 닫기
+    const el = messageRefsMap.current[messageId];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedMessageId(messageId);
+      setTimeout(() => setHighlightedMessageId(null), 2000);
+    }
+  }, [handleToggleSearch]);
  
   // ✅ 검색 입력 처리 (400ms 디바운스)
   const handleSearchInput = useCallback((value) => {
@@ -1014,7 +1065,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             <div className="chat-search-list">
               <div className="chat-search-count">{searchResults.length}개의 결과</div>
               {searchResults.map((msg, idx) => (
-                <div key={msg.messageId || idx} className="chat-search-item">
+                <div key={msg.messageId || idx} className="chat-search-item" onClick={() => handleSearchResultClick(msg.messageId)}>
                   <div className="chat-search-item-author">{msg.senderNickname || "알 수 없음"}</div>
                   <div className="chat-search-item-content">{msg.content}</div>
                   <div className="chat-search-item-date">
@@ -1236,7 +1287,8 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             return (
               <div
                 key={key}
-                className={`message-dummy ${isMine ? "message-mine" : ""} ${msg.sendStatus === "sending" ? "message-pending" : ""} ${msg.sendStatus === "failed" ? "message-failed" : ""}`}
+                ref={(el) => { if (el) messageRefsMap.current[key] = el; }}  // ← 추가
+                className={`message-dummy ${isMine ? "message-mine" : ""} ${msg.sendStatus === "sending" ? "message-pending" : ""} ${msg.sendStatus === "failed" ? "message-failed" : ""} ${highlightedMessageId === key ? "message-highlighted" : ""}`}  // ← 하이라이트 클래스 추가
               >
                 {!isMine && <MessageAvatar imageUrl={avatarImageUrl} label={authorName} />}
                 <div className={`message-content ${isMine ? "mine-content" : ""}`}>
@@ -1278,6 +1330,19 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             <strong>파일을 놓아 첨부 준비</strong>
             <span>이미지는 입력창에 미리보기로 올라가고, 전송 시 실제 업로드됩니다.</span>
           </div>
+        </div>
+      )}
+
+      {/* ✅ 입력 중 표시 (본인 제외) */}
+      {Object.keys(typingUsers).length > 0 && (
+        <div className="typing-indicator">
+          <span className="typing-dots">
+            <span></span><span></span><span></span>
+          </span>
+          <span className="typing-text">
+            {Object.values(typingUsers).slice(0, 3).join(", ")}
+            {Object.keys(typingUsers).length > 3 ? " 외 여러 명" : ""}님이 입력 중...
+          </span>
         </div>
       )}
 
@@ -1335,6 +1400,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
               if (uploadFeedback) {
                 setUploadFeedback("");
               }
+              handleTypingInput();
             }}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}

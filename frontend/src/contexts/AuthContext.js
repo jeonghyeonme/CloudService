@@ -108,6 +108,32 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(USER_KEY);
   };
 
+  const updateUser = (nextUserOrUpdater) => {
+    setUser((prevUser) => {
+      const nextUser =
+        typeof nextUserOrUpdater === "function"
+          ? nextUserOrUpdater(prevUser)
+          : nextUserOrUpdater;
+
+      if (!nextUser) {
+        localStorage.removeItem(USER_KEY);
+        return null;
+      }
+
+      const resolvedUser = {
+        userId: nextUser.userId ?? prevUser?.userId ?? null,
+        nickname: nextUser.nickname ?? prevUser?.nickname ?? "",
+        profileImageUrl:
+          nextUser.profileImageUrl !== undefined
+            ? nextUser.profileImageUrl
+            : prevUser?.profileImageUrl ?? null,
+      };
+
+      localStorage.setItem(USER_KEY, JSON.stringify(resolvedUser));
+      return resolvedUser;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{

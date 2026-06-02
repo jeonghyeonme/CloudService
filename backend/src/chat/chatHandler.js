@@ -524,6 +524,43 @@ async function aiAnalysisStarted(event, body) {
 }
 
 // =========================
+// 입력 중 상태 브로드캐스트 (typing) — 휘발성, DB 저장 안 함
+// =========================
+async function handleTyping(event, body) {
+  const connectionId = event.requestContext.connectionId;
+  const domain = event.requestContext.domainName;
+  const stage = event.requestContext.stage;
+  const apigw = getApigwClient(domain, stage);
+
+  const { serverId, userId, nickname, isTyping } = body;
+
+  if (!serverId || !userId) {
+    return { statusCode: 400, body: JSON.stringify({ message: "serverId, userId가 필요합니다." }) };
+  }
+
+  const response = await dynamoDb.send(new QueryCommand({
+    TableName: CONNECTIONS_TABLE,
+    IndexName: "serverId-index",
+    KeyConditionExpression: "serverId = :serverId",
+    ExpressionAttributeValues: { ":serverId": serverId },
+  }));
+
+  const connections = response.Items || [];
+  const targets = connections.filter((c) => c.connectionId !== connectionId);
+  
+  await Promise.all(
+    targets.map((conn) =>
+      sendToConnection(apigw, conn.connectionId, {
+        action: "typing",
+        data: { serverId, userId, nickname, isTyping: Boolean(isTyping) },
+      })
+    )
+  );
+
+  return { statusCode: 200 };
+}
+
+// =========================
 // 리소스 업데이트 브로드캐스트
 // =========================
 async function resourceUpdated(event, body) {
@@ -589,6 +626,7 @@ module.exports.handler = async (event) => {
     if (routeKey === "deleteMessage") return await deleteMessage(event, body);
     if (routeKey === "resourceUpdated") return await resourceUpdated(event, body);
     if (routeKey === "aiAnalysisStarted") return await aiAnalysisStarted(event, body);
+    if (routeKey === "typing") return await handleTyping(event, body);
 
     return { statusCode: 200 };
 
