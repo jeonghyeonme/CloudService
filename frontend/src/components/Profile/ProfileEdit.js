@@ -6,7 +6,7 @@ import { useToast } from "../../contexts/ToastContext";
 import {
   getProfileImageContentType,
   removeProfileImage,
-  updateProfile,
+  updateMyProfile,
   uploadProfileImage,
 } from "../../lib/profile";
 import "./ProfileEdit.css";
@@ -91,7 +91,7 @@ export default function ProfileEdit() {
       const fileToUpload = selectedFile || fileInputRef.current?.files?.[0] || null;
       const result = fileToUpload
         ? await uploadProfileImage(fileToUpload, payload)
-        : await updateProfile(payload);
+        : await updateMyProfile(payload);
 
       applyProfileResult(result);
       resetSelectedFile();

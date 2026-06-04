@@ -86,18 +86,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 로그아웃 처리 함수
-  const updateUser = (updates) => {
-    setUser((currentUser) => {
-      const nextUser = {
-        ...(currentUser || {}),
-        ...(updates || {}),
-      };
-
-      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-      return nextUser;
-    });
-  };
-
   const logout = () => {
     setAccessToken(null);
     setRefreshToken(null);
