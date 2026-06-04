@@ -183,16 +183,19 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
   const [isComposing, setIsComposing] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
   const [uploadFeedback, setUploadFeedback] = useState("");
+
   // ✅ 검색 관련 state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const messageRefsMap = useRef({}); // ✅ messageId → DOM ref 맵
   const searchInputRef = useRef(null);
   const searchTimerRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const dragDepthRef = useRef(0);
-  const messagesEndRef = useRef(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   const fileInputRef = useRef(null);
   const aiPendingTimeoutsRef = useRef(new Map()); // requestId → timeoutId
   const messageSendTimeoutsRef = useRef(new Map()); // clientMessageId -> timeoutId
@@ -754,6 +757,17 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       return !prev;
     });
   }, []);
+
+  // ✅ 검색 결과 클릭 → 해당 메시지로 스크롤 + 하이라이트
+  const handleSearchResultClick = useCallback((messageId) => {
+    handleToggleSearch(); // 검색창 닫기
+    const el = messageRefsMap.current[messageId];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedMessageId(messageId);
+      setTimeout(() => setHighlightedMessageId(null), 2000);
+    }
+  }, [handleToggleSearch]);
  
   // ✅ 검색 입력 처리 (400ms 디바운스)
   const handleSearchInput = useCallback((value) => {
@@ -1037,7 +1051,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             <div className="chat-search-list">
               <div className="chat-search-count">{searchResults.length}개의 결과</div>
               {searchResults.map((msg, idx) => (
-                <div key={msg.messageId || idx} className="chat-search-item">
+                <div key={msg.messageId || idx} className="chat-search-item" onClick={() => handleSearchResultClick(msg.messageId)}>
                   <div className="chat-search-item-author">{msg.senderNickname || "알 수 없음"}</div>
                   <div className="chat-search-item-content">{msg.content}</div>
                   <div className="chat-search-item-date">
@@ -1259,7 +1273,8 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             return (
               <div
                 key={key}
-                className={`message-dummy ${isMine ? "message-mine" : ""} ${msg.sendStatus === "sending" ? "message-pending" : ""} ${msg.sendStatus === "failed" ? "message-failed" : ""}`}
+                ref={(el) => { if (el) messageRefsMap.current[key] = el; }}  // ← 추가
+                className={`message-dummy ${isMine ? "message-mine" : ""} ${msg.sendStatus === "sending" ? "message-pending" : ""} ${msg.sendStatus === "failed" ? "message-failed" : ""} ${highlightedMessageId === key ? "message-highlighted" : ""}`}  // ← 하이라이트 클래스 추가
               >
                 {!isMine && <div className="avatar">{avatarChar}</div>}
                 <div className={`message-content ${isMine ? "mine-content" : ""}`}>

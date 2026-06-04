@@ -48,6 +48,7 @@ FUNCTIONS=(
   "${PREFIX}-${STAGE}-userRegister|src/auth/userRegister.handler"
   "${PREFIX}-${STAGE}-userLogin|src/auth/userLogin.handler"
   "${PREFIX}-${STAGE}-userLogout|src/auth/userLogout.handler"
+  "${PREFIX}-${STAGE}-tokenRefresh|src/auth/tokenRefresh.handler"
   "${PREFIX}-${STAGE}-getMessages|src/chat/getMessages.handler"
   "${PREFIX}-${STAGE}-chatHandler|src/chat/chatHandler.handler"
   "${PREFIX}-${STAGE}-addChannel|src/servers/addChannel.handler"

@@ -245,34 +245,6 @@ functions:
           method: post
           cors: true
 
-  getMyUserProfile:
-    handler: src/users/profile.getMe
-    events:
-      - http:
-          path: /users/me
-          method: get
-          cors: true
-
-  updateMyUserProfile:
-    handler: src/users/profile.updateMe
-    events:
-      - http:
-          path: /users/me
-          method: patch
-          cors: true
-      - http:
-          path: /users/me
-          method: put
-          cors: true
-
-  getUserProfile:
-    handler: src/users/profile.getUser
-    events:
-      - http:
-          path: /users/{userId}
-          method: get
-          cors: true
-
   # ── 채팅 관련 ────────────────────────
   getMessages:
     handler: src/chat/getMessages.handler
