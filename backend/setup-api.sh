@@ -114,7 +114,7 @@ setup_endpoint "$SERVER_ID_PARAM_ID" "DELETE" "${PREFIX}-${STAGE}-deleteServer" 
 setup_endpoint "$MESSAGES_ID"        "GET"    "${PREFIX}-${STAGE}-getMessages"        "servers/{serverId}/messages"
 setup_endpoint "$FILES_ID"           "POST"   "${PREFIX}-${STAGE}-saveFileMetadata"   "servers/{serverId}/files"
 setup_endpoint "$LINKS_ID"           "POST"   "${PREFIX}-${STAGE}-saveLink"           "servers/{serverId}/links"
-setup_endpoint "$ANALYZE_ID"         "POST"   "${PREFIX}-${STAGE}-aiRouter"           "ai/analyze"
+setup_endpoint "$ANALYZE_ID"         "POST"   "${PREFIX}-${STAGE}-aiSubmit"           "ai/analyze"
 setup_endpoint "$JOIN_ID"            "POST"   "${PREFIX}-${STAGE}-joinServer"         "servers/{serverId}/join"
 setup_endpoint "$MY_SERVERS_ID"      "GET"    "${PREFIX}-${STAGE}-getMyServers"       "servers/me"
 
