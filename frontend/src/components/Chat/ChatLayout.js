@@ -209,6 +209,50 @@ const ChatLayout = () => {
           return prev;
         });
       }
+      // 프로필 변경 (닉네임/이미지) 실시간 동기화
+      if (action === "profileChanged" && data?.userId) {
+        const { serverId: changedServerId, userId: changedUserId, nickname, profileImageUrl } = data;
+
+        // 현재 보고 있는 서버 멤버 명단 업데이트
+        setCurrentServer((prev) => {
+          if (!prev) return prev;
+          if (changedServerId && prev.serverId !== changedServerId) return prev;
+
+          const nextMembers = (prev.members || []).map((m) =>
+            m.userId === changedUserId
+              ? {
+                  ...m,
+                  ...(nickname !== undefined ? { nickname } : {}),
+                  ...(profileImageUrl !== undefined ? { profileImageUrl } : {}),
+                }
+              : m
+          );
+
+          // 호스트가 변경된 거면 호스트 닉네임/이미지도 업데이트
+          const hostUpdates = {};
+          if (prev.hostId === changedUserId) {
+            if (nickname !== undefined) hostUpdates.hostNickname = nickname;
+            if (profileImageUrl !== undefined) hostUpdates.hostProfileImageUrl = profileImageUrl;
+          }
+
+          return { ...prev, members: nextMembers, ...hostUpdates };
+        });
+
+        // 모더레이션 모달 열려있으면 거기도 업데이트
+        setModerationMembers((prev) =>
+          prev.map((m) =>
+            m.userId === changedUserId
+              ? {
+                  ...m,
+                  ...(nickname !== undefined ? { nickname } : {}),
+                  ...(profileImageUrl !== undefined ? { profileImageUrl } : {}),
+                }
+              : m
+          )
+        );
+        return;
+      }
+      // ────────────────────────────────────────────
     },
     [setCurrentServer],
   );
