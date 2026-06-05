@@ -74,7 +74,6 @@ FUNCTIONS=(
   "${PREFIX}-${STAGE}-resetInvites|src/invites/resetInvites.handler"
   "${PREFIX}-${STAGE}-validateInvite|src/invites/validateInvite.handler"
   "${PREFIX}-${STAGE}-joinByInvite|src/invites/joinByInvite.handler"
-  "${PREFIX}-${STAGE}-tokenRefresh|src/auth/tokenRefresh.handler"
   "${PREFIX}-${STAGE}-getMyUserProfile|src/users/profile.getMe"
   "${PREFIX}-${STAGE}-updateMyUserProfile|src/users/profile.updateMe"
   "${PREFIX}-${STAGE}-getUserProfile|src/users/profile.getUser"
