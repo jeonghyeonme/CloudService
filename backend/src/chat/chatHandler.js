@@ -17,6 +17,7 @@ const SERVERS_TABLE     = process.env.SERVERS_TABLE;
 const CONNECTIONS_TABLE = process.env.CONNECTIONS_TABLE;
 const MESSAGES_TABLE    = process.env.MESSAGES_TABLE;
 const SERVER_MEMBERS_TABLE = process.env.SERVER_MEMBERS_TABLE;
+const USERS_TABLE = process.env.USERS_TABLE;
 
 
 // =========================
@@ -184,6 +185,15 @@ async function joinServer(connectionId, body, event) {
     }));
   }
 
+  let joiningUser = null;
+  if (userId && USERS_TABLE) {
+    const userResult = await dynamoDb.send(new GetCommand({
+      TableName: USERS_TABLE,
+      Key: { userId },
+    })).catch(() => null);
+    joiningUser = userResult?.Item || null;
+  }
+
   // 4. 같은 서버 모든 접속자 조회
   const response = await dynamoDb.send(new QueryCommand({
     TableName: CONNECTIONS_TABLE,
@@ -209,7 +219,12 @@ async function joinServer(connectionId, body, event) {
       .map((conn) =>
         sendToConnection(apigw, conn.connectionId, {
           action: "userJoined",
-          data: { serverId, userId },
+          data: {
+            serverId,
+            userId,
+            nickname: joiningUser?.nickname,
+            profileImageUrl: joiningUser?.profileImageUrl || null,
+          },
         })
       )
   );
@@ -246,6 +261,21 @@ async function sendMessage(event, body) {
     messageType:    body.messageType,
     createdAt,
   };
+
+  if (body.senderId && USERS_TABLE) {
+    try {
+      const userResult = await dynamoDb.send(new GetCommand({
+        TableName: USERS_TABLE,
+        Key: { userId: body.senderId },
+      }));
+      item.senderProfileImageUrl = userResult.Item?.profileImageUrl || body.senderProfileImageUrl || null;
+    } catch (error) {
+      console.warn("sender profile image lookup failed:", error);
+      item.senderProfileImageUrl = body.senderProfileImageUrl || null;
+    }
+  } else {
+    item.senderProfileImageUrl = body.senderProfileImageUrl || null;
+  }
 
   if (body.messageType === "TEXT") {
     item.content = body.content;

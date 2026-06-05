@@ -41,6 +41,7 @@ exports.handler = async (event) => {
     const banEntry = {
       userId: targetUserId,
       nickname: targetMembership.Item?.nickname || userResult.Item?.nickname || "Unknown",
+      profileImageUrl: targetMembership.Item?.profileImageUrl || userResult.Item?.profileImageUrl || null,
       bannedBy: access.userId,
       bannedAt,
     };

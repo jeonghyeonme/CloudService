@@ -22,12 +22,14 @@ module.exports.handler = async (event) => {
 
     // 호스트의 nickname을 Users 테이블에서 조회
     let hostNickname = "Unknown";
+    let hostProfileImageUrl = null;
     if (hostId) {
       const userResult = await dynamoDb.send(new GetCommand({
         TableName: process.env.USERS_TABLE,
         Key: { userId: hostId },
       }));
       hostNickname = userResult.Item?.nickname || "Unknown";
+      hostProfileImageUrl = userResult.Item?.profileImageUrl || null;
     }
 
     // 1. Servers 테이블에 서버 생성
@@ -41,6 +43,7 @@ module.exports.handler = async (event) => {
         description: body.description || "",
         hostId: hostId || null,
         hostNickname,
+        hostProfileImageUrl,
         maxCapacity: body.maxCapacity || 10,
         currentCount: hostId ? 1 : 0,
         isPrivate: body.isPrivate || false,
@@ -50,7 +53,7 @@ module.exports.handler = async (event) => {
           { chId: uuidv4(), name: "일반", label: "일반", topic: "채널 설명 없음", isDefault: true },
         ],
         members: hostId
-          ? [{ userId: hostId, nickname: hostNickname, role: "HOST", joinedAt: createdAt }]
+          ? [{ userId: hostId, nickname: hostNickname, profileImageUrl: hostProfileImageUrl, role: "HOST", joinedAt: createdAt }]
           : [],
         bannedMembers: [],
       },
@@ -66,6 +69,7 @@ module.exports.handler = async (event) => {
           userId: hostId,
           serverId,
           nickname: hostNickname,
+          profileImageUrl: hostProfileImageUrl,
           role: "HOST",
           joinedAt: createdAt,
         },

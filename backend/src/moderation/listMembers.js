@@ -20,6 +20,7 @@ exports.handler = async (event) => {
       userId: member.userId,
       serverId: member.serverId,
       nickname: member.nickname,
+      profileImageUrl: member.profileImageUrl || null,
       role: member.role || "MEMBER",
       joinedAt: member.joinedAt,
       updatedAt: member.updatedAt,

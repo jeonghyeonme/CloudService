@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getServerPath } from "../../constants/path";
 import { useAuth } from "../../contexts/AuthContext";
@@ -13,16 +13,8 @@ function handleRightClick(event, callback, payload) {
   callback?.(event, payload);
 }
 
-/**
- * @title 극좌측 서버 네비게이션 바
- * @param {string} activeView - 현재 활성화된 뷰 ('home', 'chat' 등)
- * @param {function} onServerClick - 서버 아이콘 클릭 시 실행할 함수
- * @param {function} onAddClick - + 버튼 클릭 시 실행할 함수
- * @param {function} onLogout - 로그아웃 함수
- */
 const ServerSidebar = ({
   activeView,
-  onServerClick,
   onAddClick,
   onLogout,
   onServerContextMenu,
@@ -36,21 +28,23 @@ const ServerSidebar = ({
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const initial = user?.nickname ? user.nickname.charAt(0) : "프";
+  const initial = user?.nickname ? user.nickname.charAt(0).toUpperCase() : "프";
+  const profileImageUrl = user?.profileImageUrl || "";
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsProfileMenuOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
-    if (onLogout) onLogout();
+    onLogout?.();
   };
 
   const handleProfileEdit = () => {
@@ -66,9 +60,7 @@ const ServerSidebar = ({
         const serverInitial = serverName
           ? serverName.trim().charAt(0).toUpperCase()
           : "?";
-        
-        const isActiveServer =
-          activeView === "chat" && sid === activeServerId;
+        const isActiveServer = activeView === "chat" && sid === activeServerId;
         const isContextOpen =
           contextMenuType === "server" && contextMenuTargetId === sid;
 
@@ -87,7 +79,6 @@ const ServerSidebar = ({
         );
       })}
 
-      {/* 서버 추가 버튼 */}
       <div
         className="server-icon add-btn"
         onClick={onAddClick}
@@ -96,11 +87,9 @@ const ServerSidebar = ({
         +
       </div>
 
-      <div className="spacer"></div>
+      <div className="spacer" />
 
-      {/* 하단 프로필 아바타 + 팝업 메뉴 */}
       <div className="profile-wrapper" ref={menuRef}>
-        {/* 설정 팝업 메뉴 */}
         {isProfileMenuOpen && (
           <div className="profile-popup">
             <div className="profile-popup-title">
@@ -108,7 +97,6 @@ const ServerSidebar = ({
             </div>
             <div className="profile-popup-divider" />
             <button className="profile-popup-item" onClick={handleProfileEdit}>
-              <span className="popup-icon">✏️</span>
               프로필 편집
               <span className="popup-arrow">›</span>
             </button>
@@ -117,21 +105,19 @@ const ServerSidebar = ({
               className="profile-popup-item danger"
               onClick={handleLogout}
             >
-              <span className="popup-icon">🚪</span>
               로그아웃
             </button>
           </div>
         )}
 
-        {/* 프로필 아바타 버튼 */}
         <div
-          className="server-icon profile-icon"
+          className={`server-icon profile-icon ${profileImageUrl ? "has-image" : ""}`}
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
           title={user?.nickname || "프로필"}
         >
-          {user?.profileImageUrl ? (
+          {profileImageUrl ? (
             <img
-              src={user.profileImageUrl}
+              src={profileImageUrl}
               alt={user?.nickname || "프로필"}
               className="profile-icon-image"
             />

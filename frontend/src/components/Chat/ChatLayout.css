@@ -169,6 +169,18 @@
   font-size: 13px;
   flex-shrink: 0;
   color: #ffffff;
+  overflow: hidden;
+}
+
+.avatar.avatar-has-image {
+  background-color: #18181b;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* 메시지 텍스트 영역 */

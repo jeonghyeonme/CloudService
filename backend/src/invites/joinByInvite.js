@@ -62,9 +62,10 @@ exports.handler = async (event) => {
       Key: { userId },
     }));
     const nickname = userResult.Item?.nickname || "Unknown";
+    const profileImageUrl = userResult.Item?.profileImageUrl || null;
     const joinedAt = new Date().toISOString();
-    const member = { userId, serverId: invite.serverId, nickname, role: "MEMBER", joinedAt };
-    const updatedMembers = [...normalizeMembers(server), { userId, nickname, role: "MEMBER", joinedAt }];
+    const member = { userId, serverId: invite.serverId, nickname, profileImageUrl, role: "MEMBER", joinedAt };
+    const updatedMembers = [...normalizeMembers(server), { userId, nickname, profileImageUrl, role: "MEMBER", joinedAt }];
 
     const inviteUpdate = {
       TableName: process.env.INVITES_TABLE,

@@ -85,6 +85,7 @@ const ResourceHub = ({ serverResources, setCurrentServer, sendWsMessage, loading
       serverId,
       senderId: user?.userId,
       senderNickname: user?.nickname,
+      senderProfileImageUrl: user?.profileImageUrl || null,
       messageType: 'TEXT',
       content,
     });

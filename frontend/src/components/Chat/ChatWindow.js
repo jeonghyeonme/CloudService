@@ -163,6 +163,16 @@ const getDroppedFile = (event) => {
 
 const isImageUpload = (file) => Boolean(file?.type?.startsWith("image/"));
 
+function MessageAvatar({ imageUrl, label }) {
+  const avatarChar = label ? label.charAt(0).toUpperCase() : "?";
+
+  return (
+    <div className={`avatar ${imageUrl ? "avatar-has-image" : ""}`}>
+      {imageUrl ? <img src={imageUrl} alt={label || "profile"} /> : avatarChar}
+    </div>
+  );
+}
+
 /**
  * @param {string} activeChannel - 현재 활성 채널 ID
  * @param {Array} channels - 채널 목록
@@ -324,6 +334,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       channelId: activeChannel,
       senderId: user?.userId,
       senderNickname: user?.nickname,
+      senderProfileImageUrl: payload.senderProfileImageUrl || user?.profileImageUrl || null,
       messageType: payload.messageType,
       content: payload.content || "",
       imageUrl: imageType ? payload.imageUrl || payload.fileUrl || "" : "",
@@ -338,7 +349,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       sendStatus: "sending",
       isRetrying: false,
     };
-  }, [activeChannel, serverId, user?.nickname, user?.userId]);
+  }, [activeChannel, serverId, user?.nickname, user?.profileImageUrl, user?.userId]);
 
   // ✅ 메시지 수신 핸들러 - ChatLayout의 ref에 등록
   const handleWsMessage = useCallback((parsed) => {
@@ -553,6 +564,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       channelId: activeChannel,
       senderId: user?.userId,
       senderNickname: user?.nickname,
+      senderProfileImageUrl: user?.profileImageUrl || null,
       messageType: imageType ? "IMAGE" : "FILE",
       content: content || (imageType ? "" : savedFile.fileName),
       imageUrl: imageType ? savedFile.fileUrl : undefined,
@@ -562,7 +574,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       fileId: savedFile.fileId,
       s3ObjectKey: savedFile.s3ObjectKey,
     };
-  }, [activeChannel, serverId, user?.nickname, user?.userId]);
+  }, [activeChannel, serverId, user?.nickname, user?.profileImageUrl, user?.userId]);
 
   const handleUpload = useCallback(async (file) => {
     if (!file) return;
@@ -702,6 +714,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       channelId: activeChannel,
       senderId: user?.userId,
       senderNickname: user?.nickname,
+      senderProfileImageUrl: user?.profileImageUrl || null,
       messageType: "TEXT",
       content: trimmed,
     };
@@ -725,6 +738,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     serverId,
     toast,
     user?.nickname,
+    user?.profileImageUrl,
     user?.userId,
     sendTyping
   ]);
@@ -1264,7 +1278,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
             const authorName = msg.senderNickname || msg.author || "알 수 없음";
             const isMine =
               msg.senderId === user?.userId || authorName === CURRENT_USER;
-            const avatarChar = authorName.charAt(0).toUpperCase();
+            const avatarImageUrl = msg.senderProfileImageUrl || (isMine ? user?.profileImageUrl : "") || "";
 
             if (!hasRenderableContent(msg)) {
               return null;
@@ -1276,7 +1290,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
                 ref={(el) => { if (el) messageRefsMap.current[key] = el; }}  // ← 추가
                 className={`message-dummy ${isMine ? "message-mine" : ""} ${msg.sendStatus === "sending" ? "message-pending" : ""} ${msg.sendStatus === "failed" ? "message-failed" : ""} ${highlightedMessageId === key ? "message-highlighted" : ""}`}  // ← 하이라이트 클래스 추가
               >
-                {!isMine && <div className="avatar">{avatarChar}</div>}
+                {!isMine && <MessageAvatar imageUrl={avatarImageUrl} label={authorName} />}
                 <div className={`message-content ${isMine ? "mine-content" : ""}`}>
                   <span className={`author ${isMine ? "mine-author" : ""}`}>{authorName}</span>
                   {renderMessageBody(msg)}
@@ -1301,7 +1315,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
                     </div>
                   )}
                 </div>
-                {isMine && <div className="avatar">{avatarChar}</div>}
+                {isMine && <MessageAvatar imageUrl={avatarImageUrl} label={authorName} />}
               </div>
             );
           })

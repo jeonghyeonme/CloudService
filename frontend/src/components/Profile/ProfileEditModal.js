@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import {
   canUseProfileUpdateApi,
+  getProfileImageContentType,
   updateMyProfile,
   uploadProfileImage,
 } from "../../lib/profile";
@@ -11,7 +12,7 @@ import "./ProfileEditModal.css";
 const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
 
 function getInitialChar(nickname) {
-  if (!nickname) return "프";
+  if (!nickname) return "?";
   return nickname.trim().charAt(0).toUpperCase();
 }
 
@@ -29,10 +30,11 @@ const ProfileEditModal = ({ open, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isProfileUpdateEnabled = canUseProfileUpdateApi();
 
+  const trimmedNickname = nickname.trim().replace(/\s+/g, " ");
   const displayImageUrl = previewUrl || user?.profileImageUrl || "";
   const profileInitial = useMemo(
-    () => getInitialChar(nickname || user?.nickname),
-    [nickname, user?.nickname],
+    () => getInitialChar(trimmedNickname || user?.nickname),
+    [trimmedNickname, user?.nickname],
   );
 
   useEffect(() => {
@@ -64,13 +66,15 @@ const ProfileEditModal = ({ open, onClose }) => {
     const file = event.target.files?.[0] || null;
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
+    if (!getProfileImageContentType(file)) {
       toast.error("파일 형식 오류", "이미지 파일만 업로드할 수 있습니다.");
+      event.target.value = "";
       return;
     }
 
     if (file.size > MAX_PROFILE_IMAGE_SIZE) {
       toast.error("파일 크기 초과", "프로필 이미지는 5MB 이하만 가능합니다.");
+      event.target.value = "";
       return;
     }
 
@@ -82,19 +86,32 @@ const ProfileEditModal = ({ open, onClose }) => {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
+  const syncUserFromResult = (result) => {
+    const profile = resolveProfilePayload(result) || {};
+
+    updateUser((prev) => ({
+      ...(prev || {}),
+      userId: profile.userId || user?.userId || prev?.userId || null,
+      nickname: profile.nickname ?? trimmedNickname,
+      profileImageUrl:
+        profile.profileImageUrl !== undefined
+          ? profile.profileImageUrl
+          : user?.profileImageUrl ?? prev?.profileImageUrl ?? null,
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    const trimmedNickname = nickname.trim();
 
     if (!trimmedNickname) {
       toast.error("입력 확인", "닉네임을 입력해 주세요.");
       return;
     }
+
     if (!isProfileUpdateEnabled) {
       toast.error(
         "API 미설정",
-        "백엔드 프로필 수정 API가 없습니다. 환경변수(REACT_APP_PROFILE_UPDATE_ENDPOINT) 연결 후 다시 시도해 주세요.",
+        "백엔드 프로필 수정 API가 없습니다. 환경변수(REACT_APP_PROFILE_UPDATE_ENDPOINT)를 확인해 주세요.",
       );
       return;
     }
@@ -102,30 +119,12 @@ const ProfileEditModal = ({ open, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      let nextProfileImageUrl = user?.profileImageUrl || null;
+      const payload = { nickname: trimmedNickname };
+      const result = selectedFile
+        ? await uploadProfileImage(selectedFile, payload)
+        : await updateMyProfile(payload);
 
-      if (selectedFile) {
-        const uploadResult = await uploadProfileImage(selectedFile);
-        nextProfileImageUrl =
-          uploadResult?.fileUrl || uploadResult?.profileImageUrl || nextProfileImageUrl;
-      }
-
-      const result = await updateMyProfile({
-        nickname: trimmedNickname,
-        profileImageUrl: nextProfileImageUrl,
-      });
-
-      const profile = resolveProfilePayload(result) || {};
-      const syncedUser = {
-        userId: user?.userId || null,
-        nickname: profile.nickname ?? trimmedNickname,
-        profileImageUrl:
-          profile.profileImageUrl !== undefined
-            ? profile.profileImageUrl
-            : nextProfileImageUrl,
-      };
-
-      updateUser((prev) => ({ ...prev, ...syncedUser }));
+      syncUserFromResult(result);
       toast.success("프로필 저장 완료", "내 정보가 업데이트되었습니다.");
       onClose();
     } catch (error) {
@@ -150,7 +149,7 @@ const ProfileEditModal = ({ open, onClose }) => {
           disabled={isSubmitting}
           aria-label="모달 닫기"
         >
-          ✕
+          ×
         </button>
 
         <h2 className="profile-modal-title">프로필 수정</h2>
@@ -194,7 +193,7 @@ const ProfileEditModal = ({ open, onClose }) => {
             type="text"
             value={nickname}
             onChange={(event) => setNickname(event.target.value)}
-            maxLength={20}
+            maxLength={30}
             required
             disabled={isSubmitting}
             placeholder="닉네임을 입력하세요"
