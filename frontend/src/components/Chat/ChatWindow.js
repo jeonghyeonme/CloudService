@@ -163,6 +163,9 @@ const getDroppedFile = (event) => {
 
 const isImageUpload = (file) => Boolean(file?.type?.startsWith("image/"));
 
+const createFileShareContent = (nickname, fileName) =>
+  `📎 ${nickname || "사용자"}님이 파일을 공유했습니다: ${fileName || "파일"}`;
+
 function MessageAvatar({ imageUrl, label }) {
   const avatarChar = label ? label.charAt(0).toUpperCase() : "?";
 
@@ -555,6 +558,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     const imageType = savedFile.fileType?.startsWith("image/");
     const clientMessageId = createClientMessageKey();
     const createdAt = new Date().toISOString();
+    const defaultContent = createFileShareContent(user?.nickname, savedFile.fileName);
 
     return {
       messageId: clientMessageId,
@@ -566,7 +570,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       senderNickname: user?.nickname,
       senderProfileImageUrl: user?.profileImageUrl || null,
       messageType: imageType ? "IMAGE" : "FILE",
-      content: content || (imageType ? "" : savedFile.fileName),
+      content: content || defaultContent,
       imageUrl: imageType ? savedFile.fileUrl : undefined,
       fileUrl: savedFile.fileUrl,
       fileName: savedFile.fileName,

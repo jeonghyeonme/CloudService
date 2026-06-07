@@ -244,6 +244,23 @@ function isResourceMessageType(messageType) {
   return messageType === "FILE" || messageType === "IMAGE";
 }
 
+function createFileShareContent(senderNickname, fileName) {
+  const nickname = senderNickname || "사용자";
+  const displayFileName = fileName || "파일";
+  return `📎 ${nickname}님이 파일을 공유했습니다: ${displayFileName}`;
+}
+
+function applyDefaultFileShareContent(item) {
+  if (!isResourceMessageType(item.messageType)) return;
+
+  const content = String(item.content || "").trim();
+  const fileName = String(item.fileName || "").trim();
+
+  if (!content || content === fileName) {
+    item.content = createFileShareContent(item.senderNickname, item.fileName);
+  }
+}
+
 async function syncMessageResource(serverId, item) {
   if (!isResourceMessageType(item.messageType)) return null;
 
@@ -350,6 +367,8 @@ async function sendMessage(event, body) {
       body: JSON.stringify({ message: error.message }),
     };
   }
+
+  applyDefaultFileShareContent(item);
 
   // Messages 테이블에 저장
   await dynamoDb.send(new PutCommand({
