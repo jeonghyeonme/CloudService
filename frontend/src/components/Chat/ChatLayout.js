@@ -729,6 +729,7 @@ const ChatLayout = () => {
           <ChatWindow
             activeChannel={activeChannel}
             channels={currentServer.channels}
+            members={currentServer.members || []}
             sendWsMessage={sendWsMessage}
             isConnected={isConnected}
             chatMessageHandlerRef={chatMessageHandlerRef}
