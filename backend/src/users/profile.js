@@ -1,4 +1,5 @@
 const { GetCommand, QueryCommand, UpdateCommand } = require("@aws-sdk/lib-dynamodb");
+const { ApiGatewayManagementApiClient, PostToConnectionCommand } = require("@aws-sdk/client-apigatewaymanagementapi");
 const dynamoDb = require("../dynamodbClient");
 const { verifyAccessToken } = require("../utils");
 const { HEADERS } = require("../utils/response");
@@ -14,6 +15,8 @@ const {
 const USERS_TABLE = process.env.USERS_TABLE;
 const SERVERS_TABLE = process.env.SERVERS_TABLE;
 const SERVER_MEMBERS_TABLE = process.env.SERVER_MEMBERS_TABLE;
+const CONNECTIONS_TABLE = process.env.CONNECTIONS_TABLE;
+const WSS_ENDPOINT = process.env.WSS_ENDPOINT;
 
 function json(statusCode, payload) {
   return {
@@ -241,6 +244,54 @@ async function syncUserProfileToMemberships(userId, changes, updatedAt) {
   }
 }
 
+// 프로필(닉네임/이미지) 변경 시 사용자가 참여한 모든 서버 접속자에게 WebSocket 알림
+async function broadcastProfileChange(userId, changes) {
+  if (!CONNECTIONS_TABLE || !WSS_ENDPOINT) {
+    console.warn("브로드캐스트 환경변수 누락(CONNECTIONS_TABLE/WSS_ENDPOINT), 스킵");
+    return;
+  }
+  if (!Object.keys(changes).length) return;
+
+  // 1. 이 사용자가 참여한 모든 서버 조회
+  const memberships = await dynamoDb.send(new QueryCommand({
+    TableName: SERVER_MEMBERS_TABLE,
+    KeyConditionExpression: "userId = :userId",
+    ExpressionAttributeValues: { ":userId": userId },
+  }));
+
+  const serverIds = (memberships.Items || []).map((m) => m.serverId);
+  if (serverIds.length === 0) return;
+
+  const apigw = new ApiGatewayManagementApiClient({ endpoint: WSS_ENDPOINT });
+
+  // 2. 각 서버별로 활성 접속자에게 브로드캐스트
+  await Promise.all(serverIds.map(async (serverId) => {
+    const connections = await dynamoDb.send(new QueryCommand({
+      TableName: CONNECTIONS_TABLE,
+      IndexName: "serverId-index",
+      KeyConditionExpression: "serverId = :serverId",
+      ExpressionAttributeValues: { ":serverId": serverId },
+    }));
+
+    await Promise.all(
+      (connections.Items || []).map(async (conn) => {
+        try {
+          await apigw.send(new PostToConnectionCommand({
+            ConnectionId: conn.connectionId,
+            Data: Buffer.from(JSON.stringify({
+              action: "profileChanged",
+              data: { serverId, userId, ...changes },
+            })),
+          }));
+        } catch (err) {
+          // 끊긴 connection은 무시 (정상)
+          console.log(`프로필 브로드캐스트 실패 (정상): ${conn.connectionId}`);
+        }
+      })
+    );
+  }));
+}
+
 exports.getMe = async (event) => {
   try {
     const { userId, error } = getAuthUserId(event);
@@ -395,6 +446,7 @@ exports.updateMe = async (event) => {
 
     if (Object.keys(syncChanges).length) {
       await syncUserProfileToMemberships(userId, syncChanges, updatedAt);
+      await broadcastProfileChange(userId, syncChanges);
     }
 
     const oldS3ObjectKey = currentUser.profileImage?.s3ObjectKey;

@@ -186,6 +186,7 @@ function MessageAvatar({ imageUrl, label }) {
 const ChatWindow = ({
   activeChannel,
   channels,
+  members = [],
   sendWsMessage,
   isConnected,
   chatMessageHandlerRef,
@@ -231,6 +232,12 @@ const ChatWindow = ({
   const currentChannel = useMemo(
     () => channels?.find((ch) => (ch.chId || ch.id) === activeChannel),
     [channels, activeChannel],
+  );
+
+  // ✅ 메시지 닉네임/이미지 동적 매핑용 (members 변경 시 자동으로 새 닉네임 반영)
+  const memberMap = useMemo(
+    () => Object.fromEntries((members || []).map((m) => [m.userId, m])),
+    [members],
   );
 
   // 채널 초기 메시지 로드
@@ -1290,10 +1297,15 @@ const ChatWindow = ({
               );
             }
 
-            const authorName = msg.senderNickname || msg.author || "알 수 없음";
+            const senderInfo = memberMap[msg.senderId];
+            const authorName = senderInfo?.nickname || msg.senderNickname || msg.author || "알 수 없음";
             const isMine =
               msg.senderId === user?.userId || authorName === CURRENT_USER;
-            const avatarImageUrl = msg.senderProfileImageUrl || (isMine ? user?.profileImageUrl : "") || "";
+            const avatarImageUrl =
+              senderInfo?.profileImageUrl ||
+              msg.senderProfileImageUrl ||
+              (isMine ? user?.profileImageUrl : "") ||
+              "";
 
             if (!hasRenderableContent(msg)) {
               return null;
