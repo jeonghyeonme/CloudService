@@ -12,6 +12,7 @@ const {
 const { v4: uuidv4 } = require("uuid");
 
 const dynamoDb = require("../dynamodbClient");
+const { saveServerFileMetadata } = require("../resources/fileMetadataStore");
 
 const SERVERS_TABLE     = process.env.SERVERS_TABLE;
 const CONNECTIONS_TABLE = process.env.CONNECTIONS_TABLE;
@@ -239,6 +240,40 @@ async function joinServer(connectionId, body, event) {
 // =========================
 // 메시지 전송
 // =========================
+function isResourceMessageType(messageType) {
+  return messageType === "FILE" || messageType === "IMAGE";
+}
+
+async function syncMessageResource(serverId, item) {
+  if (!isResourceMessageType(item.messageType)) return null;
+
+  const fileUrl = item.fileUrl || item.imageUrl;
+  if (!serverId || !item.fileName || !fileUrl) return null;
+
+  const { file } = await saveServerFileMetadata({
+    serverId,
+    fileId: item.fileId,
+    fileName: item.fileName,
+    fileUrl,
+    fileType: item.fileType,
+    s3ObjectKey: item.s3ObjectKey,
+    uploadedBy: item.senderId,
+    uploadedAt: item.createdAt,
+  });
+
+  item.fileId = file.fileId;
+  item.fileName = file.fileName;
+  item.fileUrl = file.fileUrl;
+  item.fileType = file.fileType;
+  item.s3ObjectKey = file.s3ObjectKey;
+
+  if (item.messageType === "IMAGE") {
+    item.imageUrl = file.fileUrl;
+  }
+
+  return file;
+}
+
 async function sendMessage(event, body) {
   const connectionId = event.requestContext.connectionId;
   const domain       = event.requestContext.domainName;
@@ -306,6 +341,16 @@ async function sendMessage(event, body) {
     item.linkName = body.linkName || "";
   }
 
+  let syncedResource = null;
+  try {
+    syncedResource = await syncMessageResource(serverId, item);
+  } catch (error) {
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify({ message: error.message }),
+    };
+  }
+
   // Messages 테이블에 저장
   await dynamoDb.send(new PutCommand({
     TableName: MESSAGES_TABLE,
@@ -323,14 +368,32 @@ async function sendMessage(event, body) {
   const connections = response.Items || [];
 
   // 같은 방 모든 접속자에게 동시 브로드캐스트
-  await Promise.all(
-    connections.map((conn) =>
-      sendToConnection(apigw, conn.connectionId, {
-        action: "receiveMessage",
-        data:   item,
-      })
-    )
+  const receiveMessageBroadcasts = connections.map((conn) =>
+    sendToConnection(apigw, conn.connectionId, {
+      action: "receiveMessage",
+      data:   item,
+    })
   );
+
+  const resourceUpdatedBroadcasts = syncedResource
+    ? connections.map((conn) =>
+        sendToConnection(apigw, conn.connectionId, {
+          action: "resourceUpdated",
+          data: {
+            serverId,
+            resourceType: "file",
+            resourceAction: "add",
+            data: syncedResource,
+            updatedAt: new Date().toISOString(),
+          },
+        })
+      )
+    : [];
+
+  await Promise.all([
+    ...receiveMessageBroadcasts,
+    ...resourceUpdatedBroadcasts,
+  ]);
 
   return { statusCode: 200 };
 }
