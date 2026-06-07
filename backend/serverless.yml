@@ -272,6 +272,12 @@ functions:
           route: updateMessage
       - websocket:
           route: deleteMessage
+      - websocket:
+          route: resourceUpdated
+      - websocket:
+          route: aiAnalysisStarted
+      - websocket:
+          route: typing
 
   # ── 채널 추가/삭제/수정 ───────────────────
   addChannel:

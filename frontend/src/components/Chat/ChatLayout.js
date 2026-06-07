@@ -220,6 +220,31 @@ const ChatLayout = () => {
     onMessage: handleWsMessage,
   });
 
+  const handleUploadedFileAdded = useCallback(
+    (file) => {
+      if (!file) return;
+
+      setCurrentServer((prev) => {
+        if (!prev) return prev;
+
+        const files = prev.files || [];
+        const alreadyExists = files.some((item) => (
+          (file.fileId && item.fileId === file.fileId) ||
+          (file.s3ObjectKey && item.s3ObjectKey === file.s3ObjectKey) ||
+          (file.fileUrl && item.fileUrl === file.fileUrl)
+        ));
+
+        if (alreadyExists) return prev;
+
+        return {
+          ...prev,
+          files: [...files, file],
+        };
+      });
+    },
+    [setCurrentServer],
+  );
+
   const {
     contextMenu,
     settingsModal,
@@ -689,6 +714,7 @@ const ChatLayout = () => {
             isConnected={isConnected}
             chatMessageHandlerRef={chatMessageHandlerRef}
             typingUsers={typingUsers}
+            onFileUploaded={handleUploadedFileAdded}
           />
         )}
 

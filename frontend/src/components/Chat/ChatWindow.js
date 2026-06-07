@@ -163,6 +163,9 @@ const getDroppedFile = (event) => {
 
 const isImageUpload = (file) => Boolean(file?.type?.startsWith("image/"));
 
+const createFileShareContent = (nickname, fileName) =>
+  `📎 ${nickname || "사용자"}님이 파일을 공유했습니다: ${fileName || "파일"}`;
+
 function MessageAvatar({ imageUrl, label }) {
   const avatarChar = label ? label.charAt(0).toUpperCase() : "?";
 
@@ -180,7 +183,15 @@ function MessageAvatar({ imageUrl, label }) {
  * @param {boolean} isConnected - WebSocket 연결 상태
  * @param {object} chatMessageHandlerRef - ChatLayout에서 메시지 핸들러 등록용 ref
  */
-const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef, typingUsers = {} }) => {
+const ChatWindow = ({
+  activeChannel,
+  channels,
+  sendWsMessage,
+  isConnected,
+  chatMessageHandlerRef,
+  typingUsers = {},
+  onFileUploaded,
+}) => {
   const { user } = useAuth();
   const toast = useToast();
   const { serverId } = useParams();
@@ -555,6 +566,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     const imageType = savedFile.fileType?.startsWith("image/");
     const clientMessageId = createClientMessageKey();
     const createdAt = new Date().toISOString();
+    const defaultContent = createFileShareContent(user?.nickname, savedFile.fileName);
 
     return {
       messageId: clientMessageId,
@@ -566,7 +578,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       senderNickname: user?.nickname,
       senderProfileImageUrl: user?.profileImageUrl || null,
       messageType: imageType ? "IMAGE" : "FILE",
-      content: content || (imageType ? "" : savedFile.fileName),
+      content: content || defaultContent,
       imageUrl: imageType ? savedFile.fileUrl : undefined,
       fileUrl: savedFile.fileUrl,
       fileName: savedFile.fileName,
@@ -617,6 +629,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     setIsUploading(true);
     try {
       const savedFile = await uploadFile(serverId, file);
+      onFileUploaded?.(savedFile);
       const payload = createUploadPayload(savedFile);
       sendOptimisticMessage(payload);
     } catch (error) {
@@ -627,7 +640,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     } finally {
       setIsUploading(false);
     }
-  }, [activeChannel, createUploadPayload, isConnected, sendOptimisticMessage, serverId, toast]);
+  }, [activeChannel, createUploadPayload, isConnected, onFileUploaded, sendOptimisticMessage, serverId, toast]);
 
   const clearPendingImage = useCallback(() => {
     setPendingImage((prev) => {
@@ -689,6 +702,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       setIsUploading(true);
       try {
         const savedFile = await uploadFile(serverId, pendingImage.file);
+        onFileUploaded?.(savedFile);
         const payload = createUploadPayload(savedFile, trimmed);
         setUploadFeedback("");
         sendOptimisticMessage(payload);
@@ -733,6 +747,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     createUploadPayload,
     inputText,
     isConnected,
+    onFileUploaded,
     pendingImage,
     sendOptimisticMessage,
     serverId,
