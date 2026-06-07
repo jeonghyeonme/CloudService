@@ -183,7 +183,15 @@ function MessageAvatar({ imageUrl, label }) {
  * @param {boolean} isConnected - WebSocket 연결 상태
  * @param {object} chatMessageHandlerRef - ChatLayout에서 메시지 핸들러 등록용 ref
  */
-const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatMessageHandlerRef, typingUsers = {} }) => {
+const ChatWindow = ({
+  activeChannel,
+  channels,
+  sendWsMessage,
+  isConnected,
+  chatMessageHandlerRef,
+  typingUsers = {},
+  onFileUploaded,
+}) => {
   const { user } = useAuth();
   const toast = useToast();
   const { serverId } = useParams();
@@ -621,6 +629,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     setIsUploading(true);
     try {
       const savedFile = await uploadFile(serverId, file);
+      onFileUploaded?.(savedFile);
       const payload = createUploadPayload(savedFile);
       sendOptimisticMessage(payload);
     } catch (error) {
@@ -631,7 +640,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     } finally {
       setIsUploading(false);
     }
-  }, [activeChannel, createUploadPayload, isConnected, sendOptimisticMessage, serverId, toast]);
+  }, [activeChannel, createUploadPayload, isConnected, onFileUploaded, sendOptimisticMessage, serverId, toast]);
 
   const clearPendingImage = useCallback(() => {
     setPendingImage((prev) => {
@@ -693,6 +702,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
       setIsUploading(true);
       try {
         const savedFile = await uploadFile(serverId, pendingImage.file);
+        onFileUploaded?.(savedFile);
         const payload = createUploadPayload(savedFile, trimmed);
         setUploadFeedback("");
         sendOptimisticMessage(payload);
@@ -737,6 +747,7 @@ const ChatWindow = ({ activeChannel, channels, sendWsMessage, isConnected, chatM
     createUploadPayload,
     inputText,
     isConnected,
+    onFileUploaded,
     pendingImage,
     sendOptimisticMessage,
     serverId,
