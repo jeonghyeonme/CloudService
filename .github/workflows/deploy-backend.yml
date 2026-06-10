@@ -6,6 +6,7 @@ on:
       - dev
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 permissions:
   id-token: write # OIDC 인증을 위해 필수
