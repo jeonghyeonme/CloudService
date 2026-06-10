@@ -37,6 +37,7 @@ jobs:
           CI: false
           REACT_APP_API_HOST: ${{ secrets.REACT_APP_API_HOST }}
           REACT_APP_WS_HOST: ${{ secrets.REACT_APP_WS_HOST }}
+          REACT_APP_GOOGLE_CLIENT_ID: ${{ secrets.REACT_APP_GOOGLE_CLIENT_ID }}
 
       - name: AWS 자격증명 설정 (OIDC 방식)
         uses: aws-actions/configure-aws-credentials@v4

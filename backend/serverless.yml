@@ -245,6 +245,16 @@ functions:
           method: post
           cors: true
 
+  googleLogin:
+    handler: src/auth/googleLogin.handler
+    events:
+      - http:
+          path: /googleLogin
+          method: post
+          cors: true
+    environment:
+      GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID, "316917563245-8iuvfqvddkjjdaaeedc6uqv5kb08ro23.apps.googleusercontent.com"}
+
   # ── 채팅 관련 ────────────────────────
   getMessages:
     handler: src/chat/getMessages.handler
