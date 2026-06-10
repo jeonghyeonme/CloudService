@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { login as loginApi } from "../../lib/auth";
+import { GoogleLogin } from "@react-oauth/google";
+import { login as loginApi, googleLogin as googleLoginApi } from "../../lib/auth";
 import { useAuth } from "../../contexts/AuthContext";
 import { PATHS } from "../../constants/path";
 import AuthShell from "./AuthShell";
@@ -36,6 +37,30 @@ const Login = () => {
       navigate(PATHS.explore, { replace: true });
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ 구글 로그인 핸들러
+  const handleGoogleLogin = async (credentialResponse) => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const idToken = credentialResponse.credential;
+      const data = await googleLoginApi(idToken);
+
+      login({
+        nickname: data.nickname,
+        profileImageUrl: data.profileImageUrl,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+      });
+
+      navigate(PATHS.explore, { replace: true });
+    } catch (err) {
+      setError(err.message || "Google 로그인에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -94,6 +119,24 @@ const Login = () => {
         <button type="submit" className="btn-neon" disabled={loading}>
           {loading ? "로그인 중..." : "로그인"}
         </button>
+
+        {/* ✅ 구분선 + 구글 로그인 버튼 */}
+        <div className="auth-divider">
+          <span>또는</span>
+        </div>
+
+        <div className="google-login-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => setError("Google 로그인에 실패했습니다.")}
+            useOneTap={false}
+            theme="filled_black"
+            text="signin_with"
+            shape="rectangular"
+            size="large"
+            width="320"
+          />
+        </div>
       </form>
     </AuthShell>
   );

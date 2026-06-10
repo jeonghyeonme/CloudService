@@ -36,3 +36,11 @@ export function logout(refreshToken) {
     },
   });
 }
+
+// 구글 로그인
+export function googleLogin(idToken) {
+  return request(ENDPOINTS.auth.googleLogin, {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
+}

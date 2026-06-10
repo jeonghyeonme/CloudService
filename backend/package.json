@@ -25,6 +25,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1029.0",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.2.0",
+    "google-auth-library": "^10.7.0",
     "jsonwebtoken": "^9.0.2",
     "mupdf": "^1.27.0",
     "uuid": "^9.0.0"

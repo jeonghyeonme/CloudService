@@ -36,7 +36,8 @@ ENV_VARS="{
     \"SALT\":                 \"PLACEHOLDER\",
     \"WSS_ENDPOINT\":         \"${WSS_ENDPOINT}\",
     \"AI_QUEUE_URL\":         \"${AI_QUEUE_URL}\",
-    \"INVITES_TABLE\":        \"${PREFIX}-Invites\"
+    \"INVITES_TABLE\":        \"${PREFIX}-Invites\",
+    \"GOOGLE_CLIENT_ID\":     \"316917563245-8iuvfqvddkjjdaaeedc6uqv5kb08ro23.apps.googleusercontent.com\"
   }
 }"
 
@@ -49,6 +50,7 @@ FUNCTIONS=(
   "${PREFIX}-${STAGE}-userLogin|src/auth/userLogin.handler"
   "${PREFIX}-${STAGE}-userLogout|src/auth/userLogout.handler"
   "${PREFIX}-${STAGE}-tokenRefresh|src/auth/tokenRefresh.handler"
+  "${PREFIX}-${STAGE}-googleLogin|src/auth/googleLogin.handler"
   "${PREFIX}-${STAGE}-getMessages|src/chat/getMessages.handler"
   "${PREFIX}-${STAGE}-chatHandler|src/chat/chatHandler.handler"
   "${PREFIX}-${STAGE}-addChannel|src/servers/addChannel.handler"

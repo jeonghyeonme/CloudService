@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./App.css";
 
 // Context
@@ -118,13 +119,15 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <ServerProvider>
-          <AppRoutes />
-        </ServerProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <ToastProvider>
+          <ServerProvider>
+            <AppRoutes />
+          </ServerProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 
