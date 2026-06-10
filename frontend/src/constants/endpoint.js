@@ -12,6 +12,7 @@ export const ENDPOINTS = {
     login: "/userLogin",
     refresh: "/token/refresh",
     logout: "/userLogout",
+    googleLogin: "/googleLogin",
   },
   profile: {
     me: process.env.REACT_APP_PROFILE_ME_ENDPOINT || "",
